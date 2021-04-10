@@ -3,6 +3,12 @@
 declare namespace PIXI {
   type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
+  export type TextInputRule = {
+    type: string;
+    onError: () => void;
+    validate?: (value: any) => boolean;
+  };
+
   export type TextInputOptions = {
     position?: string;
     background?: string;
@@ -15,12 +21,6 @@ declare namespace PIXI {
     type?: string;
     rules?: TextInputRule[];
   }
-
-  export type TextInputRule = {
-    type: string;
-    onError: () => void;
-    validate?: (value: any) => boolean;
-  };
 
   export class TextInput extends PIXI.Container {
     _input_style: TextInputOptions;
@@ -63,8 +63,6 @@ declare namespace PIXI {
 
     get text(): string;
     set text(text: string);
-
-    htmlInput(): object;
 
     focus(): void;
 
