@@ -1,9 +1,9 @@
 {
   "name": "pixi-text-input-plus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PIXI text-input-plus",
   "main": "src/index.js",
-  "types": "text-input-plus.d.ts",
+  "types": "pixi-text-input-plus.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buld": "npx webpack init",

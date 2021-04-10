@@ -6,7 +6,7 @@ module.exports = {
     index: './src/index.js',
   },
   output: {
-    filename: 'text-input-plus.min.js',
+    filename: 'pixi-text-input-plus.min.js',
     path: path.resolve(__dirname, 'dist'),
   },
   optimization: {
