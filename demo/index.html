@@ -113,10 +113,35 @@ function init(){
       type: 'password',
 		},
 		box: {
+			error: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xFF0000, width: 3}},
+			valid: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0x00FF00, width: 3}},
 			default: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xCBCEE0, width: 3}},
 			focused: {fill: 0xE1E3EE, rounded: 12, stroke: {color: 0xABAFC6, width: 3}},
 			disabled: {fill: 0xDBDBDB, rounded: 12}
-		}
+		},
+		rules: [
+			{
+				type: 'required',
+				onError: function() {
+					console.log('input required');
+				}
+			},
+			{
+				type: 'min:3',
+				onError: function() {
+					console.log('input min 3 chars');
+				}
+			},
+			{
+				type: 'regexp',
+				validate: function(value) {
+					return value === 'password';
+				},
+				onError: function() {
+					console.log('it must be entered password');
+				}
+			},
+		]
 	});
 
 	input.placeholder = 'Enter your Text...'

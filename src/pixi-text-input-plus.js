@@ -1,5 +1,5 @@
 export class TextInput extends PIXI.Container {
-	constructor(styles) {
+	constructor(config) {
 		super();
 
 		this._input_style = Object.assign(
@@ -11,17 +11,19 @@ export class TextInput extends PIXI.Container {
 				transformOrigin: '0 0',
 				lineHeight: '1',
 			},
-			styles.input
+			config.input
 		);
 		if (!this._input_style.type) {
 			this._input_style.type = 'text';
 		}
 
-		if (styles.box) {
-			this._box_generator = typeof styles.box === 'function' ? styles.box : new DefaultBoxGenerator(styles.box);
+		if (config.box) {
+			this._box_generator = typeof config.box === 'function' ? config.box : new DefaultBoxGenerator(config.box);
 		} else {
 			this._box_generator = null;
 		}
+
+		this._rules = config.rules || [];
 
 		if (this._input_style.hasOwnProperty('multiline')) {
 			this._multiline = !!this._input_style.multiline;
@@ -235,7 +237,8 @@ export class TextInput extends PIXI.Container {
 	}
 
 	_onBlurred() {
-		this._setState('DEFAULT');
+		const state = this._checkRules();
+		this._setState(state);
 		this.emit('blur');
 	}
 
@@ -256,6 +259,73 @@ export class TextInput extends PIXI.Container {
 		if (this._substituted) {
 			this._updateSubstitution();
 		}
+	}
+
+	// Allows to check email, number, string and min length
+	_checkRules() {
+		const emailRegexp = /([a-z0-9-_]+){2}@([a-z0-9-_]+){2}\.([a-z]+){2}/;
+		const numberRegexp = /^\d+$/;
+		const stringRegexp = /^(?:.*[A-Za-z])$/;
+
+		let state = 'VALID';
+
+		for (let i = 0, li = this._rules.length; i < li; i++) {
+			const rule = this._rules[i];
+
+			if (rule.type === 'required') {
+				if (!this.text || !this.text.trim().length) {
+					state = 'ERROR';
+				} else {
+					continue;
+				}
+			}
+
+			if (this.text) {
+				if (rule.type === 'email') {
+					if (!emailRegexp.test(this.text)) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else if (rule.type === 'number') {
+					if (!numberRegexp.test(this.text)) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else if (rule.type === 'string') {
+					if (!stringRegexp.test(this.text)) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else if (rule.type.includes('min:')) {
+					const minLength = parseInt(rule.type.replace('min:', ''));
+					if (this.text.length < minLength) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else {
+					if (!rule.validate) {
+						console.warn('you must set validate function to performed');
+					} else {
+						if (!rule.validate(this.text)) {
+							state = 'ERROR';
+						}
+					}
+				}
+			}
+
+			if (state === 'ERROR') {
+				if (rule.onError) {
+					rule.onError();
+				}
+				break;
+			}
+		}
+
+		return state;
 	}
 
 	// RENDER & UPDATE
@@ -560,7 +630,7 @@ export class TextInput extends PIXI.Container {
 	_buildBoxCache() {
 		this._destroyBoxCache();
 
-		let states = ['DEFAULT', 'FOCUSED', 'DISABLED'];
+		let states = ['DEFAULT', 'FOCUSED', 'DISABLED', 'VALID', 'ERROR'];
 		let input_bounds = this._getDOMInputBounds();
 
 		for (let i in states) {

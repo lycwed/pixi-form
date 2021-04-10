@@ -1,7 +1,7 @@
 /// <reference types="pixi.js" />
 
 declare namespace PIXI {
-  type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | string;
+  type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
   export type TextInputOptions = {
     position?: string;
@@ -13,7 +13,14 @@ declare namespace PIXI {
     box?: any;
     input?: any;
     type?: string;
+    rules?: TextInputRule[];
   }
+
+  export type TextInputRule = {
+    type: string;
+    onError: () => void;
+    validate?: (value: any) => boolean;
+  };
 
   export class TextInput extends PIXI.Container {
     _input_style: TextInputOptions;
@@ -32,6 +39,7 @@ declare namespace PIXI {
     _disabled: boolean;
     _max_length: number;
     _type: string;
+    _rules: TextInputRule[];
     state: STATUS;
 
     constructor(options?: TextInputOptions);
@@ -87,6 +95,8 @@ declare namespace PIXI {
     _onRemoved(): void;
 
     _setState(state: STATUS): void;
+
+    _checkRules(): string;
 
     renderWebGL(renderer: PIXI.Renderer): void;
 
@@ -151,32 +161,6 @@ declare namespace PIXI {
     _comparePixiMatrices(m1: object, m2: object): boolean;
 
     _compareClientRects(r1: object, r2: object): boolean;
-  }
-
-  type ButtonOptions = {
-    anchor?: number;
-    x?: number;
-    y?: number;
-    textureButton?: PIXI.Texture;
-    textureButtonDown?: PIXI.Texture;
-    textureButtonOver?: PIXI.Texture;
-  }
-
-  type BUTTON_STATUS = 'BUTTONDOWN' | 'BUTTONCONFIRM' | 'BUTTONUP' | 'BUTTONOVER' | 'BUTTONOUT' | string;
-
-  export class ButtonTexture extends PIXI.utils.EventEmitter {
-    _options: ButtonOptions;
-    button: PIXI.Sprite;
-
-    constructor(options?: ButtonOptions);
-
-    protected onButtonDown(): void;
-
-    protected onButtonUp(): void;
-
-    protected onButtonOver(): void;
-
-    getButtonFace(): PIXI.Sprite;
   }
 }
 

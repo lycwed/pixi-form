@@ -1,6 +1,6 @@
 {
   "name": "pixi-text-input-plus",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "PIXI text-input-plus",
   "main": "src/index.js",
   "types": "pixi-text-input-plus.d.ts",
@@ -8,8 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "buld": "npx webpack init",
     "watch": "webpack --watch",
+    "patch:version": "npm --no-git-tag-version version patch && git commit -am \"update version to $npm_package_version\"",
+    "minor:version": "npm --no-git-tag-version version minor && git commit -am \"update version to $npm_package_version\"",
     "build:dev": "webpack --config webpack.dev.js",
-    "build:prod": "webpack --mode=production",
+    "build:prod:patch": "npm run patch:version && webpack --mode=production && npm publish",
+    "build:prod:minor": "npm run minor:version && webpack --mode=production && npm publish",
     "start": "webpack serve --open --config webpack.dev.js"
   },
   "repository": {
