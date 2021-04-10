@@ -163,5 +163,7 @@ declare namespace PIXI {
 }
 
 declare module 'pixi-text-input-plus' {
+  export = TextInputRule;
+  export = TextInputOptions;
   export = PIXI.TextInput;
 }
