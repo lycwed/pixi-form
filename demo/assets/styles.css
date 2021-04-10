@@ -1,0 +1,36 @@
+body,html{
+  font-family: 'Helvetica Neue', Helvetica, Arial;
+  background-color: #eee;
+  text-align: center;
+}
+canvas{
+  display: block;
+  margin: auto;
+  width: 100%;
+}
+.controls > div{
+  display: inline-block;
+  margin: 20px 10px 0 10px;
+  vertical-align: middle;
+}
+.controls > div input,
+.controls > div select{
+  font-size: 13pt;
+  padding: 3px;
+}
+.controls > div input[type=number]{
+  width: 50px;
+}
+.controls > div input[type=button]{
+  padding: 3px 8px;
+}
+.source{
+  margin: auto;
+  margin-top: 100px;
+  max-width: 800px;
+  text-align: left;
+}
+.source pre{
+  background-color: rgba(255,255,255,0.8);
+  padding: 15px;
+}
