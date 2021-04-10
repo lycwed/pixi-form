@@ -1,6 +1,6 @@
 {
   "name": "pixi-text-input-plus",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "PIXI text-input-plus",
   "main": "src/index.js",
   "types": "pixi-text-input-plus.d.ts",
