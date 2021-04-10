@@ -1,26 +1,26 @@
 /// <reference types="pixi.js" />
 
+export type TextInputRule = {
+  type: string;
+  onError: () => void;
+  validate?: (value: any) => boolean;
+};
+
+export type TextInputOptions = {
+  position?: string;
+  background?: string;
+  border?: string;
+  outline?: string;
+  lineHeight?: string;
+  multiline?: boolean;
+  box?: any;
+  input?: any;
+  type?: string;
+  rules?: TextInputRule[];
+}
+
 declare namespace PIXI {
   type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
-
-  export type TextInputRule = {
-    type: string;
-    onError: () => void;
-    validate?: (value: any) => boolean;
-  };
-
-  export type TextInputOptions = {
-    position?: string;
-    background?: string;
-    border?: string;
-    outline?: string;
-    lineHeight?: string;
-    multiline?: boolean;
-    box?: any;
-    input?: any;
-    type?: string;
-    rules?: TextInputRule[];
-  }
 
   export class TextInput extends PIXI.Container {
     _input_style: TextInputOptions;
