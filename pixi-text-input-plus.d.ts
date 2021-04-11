@@ -1,6 +1,6 @@
 /// <reference types="pixi.js" />
 
-declare namespace PIXI.form {
+declare namespace PIXI {
   type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
   export type TextInputRule = {
@@ -163,5 +163,5 @@ declare namespace PIXI.form {
 }
 
 declare module 'pixi-text-input-plus' {
-  export = PIXI.form.TextInput;
+  export = PIXI.TextInput;
 }
