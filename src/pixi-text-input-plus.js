@@ -1,5 +1,5 @@
 export class TextInput extends PIXI.Container {
-	constructor(config) {
+	constructor(options) {
 		super();
 
 		this._input_style = Object.assign(
@@ -11,19 +11,22 @@ export class TextInput extends PIXI.Container {
 				transformOrigin: '0 0',
 				lineHeight: '1',
 			},
-			config.input
+			options.input
 		);
-		if (!this._input_style.type) {
-			this._input_style.type = 'text';
+
+		this._type = this._input_style.type || 'text';
+
+		if (this._input_style.type) {
+			delete this._input_style.type;
 		}
 
-		if (config.box) {
-			this._box_generator = typeof config.box === 'function' ? config.box : new DefaultBoxGenerator(config.box);
+		if (options.box) {
+			this._box_generator = typeof options.box === 'function' ? options.box : new DefaultBoxGenerator(options.box);
 		} else {
 			this._box_generator = null;
 		}
 
-		this._rules = config.rules || [];
+		this._rules = options.rules || [];
 
 		if (this._input_style.hasOwnProperty('multiline')) {
 			this._multiline = !!this._input_style.multiline;
@@ -188,7 +191,7 @@ export class TextInput extends PIXI.Container {
 			this._dom_input.style.resize = 'none';
 		} else {
 			this._dom_input = document.createElement('input');
-			this._dom_input.type = this._input_style.type;
+			this._dom_input.type = this._type;
 		}
 
 		for (let key in this._input_style) {

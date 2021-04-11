@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const webpackConfig = require('./webpack.config');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackInjector = require('html-webpack-injector');
 
 module.exports = {
   ...webpackConfig,
