@@ -1,13 +1,13 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
   entry: {
     index: path.resolve(__dirname, 'src/index.js'),
   },
   output: {
-    filename: 'pixi-text-input-plus.min.js',
     path: path.resolve(__dirname, 'dist'),
+    filename: 'pixi-text-input-plus.min.js',
+    libraryTarget: "umd",
   },
   optimization: {
     minimize: true,
@@ -15,7 +15,8 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\\.(js|jsx)$/,
+        test: /\\.(js)$/,
+        exclude: /node_modules/,
         loader: 'babel-loader',
       },
     ],
