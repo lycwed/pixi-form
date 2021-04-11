@@ -1,6 +1,6 @@
 {
   "name": "pixi-text-input-plus",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "PIXI text-input-plus",
   "main": "dist/pixi-text-input-plus.ts",
   "types": "pixi-text-input-plus.d.ts",
