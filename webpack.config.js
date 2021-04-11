@@ -3,7 +3,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    index: './src/index.js',
+    index: path.resolve(__dirname, 'src/index.js'),
   },
   output: {
     filename: 'pixi-text-input-plus.min.js',
