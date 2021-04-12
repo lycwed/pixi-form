@@ -4,4 +4,4 @@ if (PIXI) {
   PIXI.TextInput = TextInput;
 }
 
-module.exports = TextInput;
+export default TextInput;
