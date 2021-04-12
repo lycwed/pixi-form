@@ -1,9 +1,9 @@
 {
-  "name": "pixi-text-input-plus",
+  "name": "pixi-form",
   "version": "1.0.27",
-  "description": "PIXI text-input-plus",
+  "description": "PIXI v5 extension to provide form elements.",
   "main": "src/index.js",
-  "types": "pixi-text-input-plus.d.ts",
+  "types": "pixi-form.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buld": "npx webpack init",

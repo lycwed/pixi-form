@@ -1,7 +1,10 @@
-import { TextInput } from './pixi-text-input-plus';
+var TextInput = require("./pixi-form");
+var form = {
+  TextInput: TextInput,
+};
 
-if (PIXI) {
-  PIXI.TextInput = TextInput;
-}
+Object.defineProperties(PIXI, {
+  form: form,
+});
 
-export default TextInput;
+module.exports = form;
