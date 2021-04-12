@@ -1,5 +1,7 @@
-var TextInput = require("./pixi-text-input-plus");
+import { TextInput } from './pixi-text-input-plus';
 
-Object.assign(PIXI, TextInput);
+if (PIXI) {
+  PIXI.TextInput = TextInput;
+}
 
 module.exports = TextInput;
