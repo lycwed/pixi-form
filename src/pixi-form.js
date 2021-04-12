@@ -457,6 +457,7 @@ export class TextInput extends PIXI.Container {
 		this._surrogate_hitbox.interactive = true;
 		this._surrogate_hitbox.cursor = 'text';
 		this._surrogate_hitbox.on('pointerdown', this._onSurrogateFocus.bind(this));
+		this._surrogate_hitbox.on('pointeroutside', this.blur.bind(this));
 		this.addChild(this._surrogate_hitbox);
 
 		this._surrogate_mask = new PIXI.Graphics();
