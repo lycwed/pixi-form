@@ -6,11 +6,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'pixi-text-input-plus.min.js',
-    libraryTarget: "umd",
-  },
-  optimization: {
-    minimize: true,
+    filename: 'pixi-form.js',
   },
   module: {
     rules: [
