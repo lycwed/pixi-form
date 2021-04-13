@@ -1,8 +1,9 @@
 var TextInput = require("./pixi-form");
-var form = {
-  form: TextInput,
-};
 
-Object.assign(PIXI, form);
+Object.assign(PIXI, {
+  form: {
+    TextInput: TextInput.default,
+  },
+});
 
-module.exports = form;
+module.exports = PIXI.form;

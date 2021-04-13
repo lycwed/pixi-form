@@ -1,4 +1,4 @@
-export class TextInput extends PIXI.Container {
+export default class TextInput extends PIXI.Container {
 	constructor(options) {
 		super();
 
