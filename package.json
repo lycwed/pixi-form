@@ -1,6 +1,6 @@
 {
   "name": "pixi-form",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "PIXI v5 extension to provide form elements.",
   "main": "src/index.js",
   "types": "pixi-form.d.ts",
