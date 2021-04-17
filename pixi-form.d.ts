@@ -17,6 +17,22 @@ declare namespace PIXI {
       styles: TextInputStyles;
     };
 
+    export class TextInputStylesOptions {
+      width: number;
+      color?: number;
+      padding?: number;
+      fontSize?: number;
+      fontFamily?: number;
+      backgroundColor?: number;
+      position?: string;
+      backgroundColor?: number;
+      border?: {
+        color?: number;
+        width?: number;
+        radius?: number;
+      };
+    };
+
     export class TextInputStyles {
       width: number;
       color?: number;
@@ -34,6 +50,8 @@ declare namespace PIXI {
       outline?: string;
       lineHeight?: string;
       multiline?: boolean;
+
+      constructor(options?: TextInputStylesOptions);
     }
 
     export class TextInput extends PIXI.Container {
