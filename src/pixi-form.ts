@@ -1,46 +1,58 @@
-export class TextInputStyles {
-	constructor(styles) {
-		this.width = styles.width || 200;
-		this.color = styles.color || 0x333333;
-		this.padding = styles.padding || 4;
-		this.fontSize = styles.fontSize || 13;
-		this.fontFamily = styles.fontFamily || 'Arial';
-		this.backgroundColor = styles.backgroundColor || 0xEFEFEF;
-		this.border = {
-			...{ color: 0xFFFFFF, width: 0, radius: 0 }, ...styles.border
-		};
-	}
+import * as PIXI from 'pixi.js';
+
+export type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
+
+export type FormInputRule = {
+  type: string;
+  onFail: () => void;
+  validate?: (value: any) => boolean;
+};
+
+export class FormInputStyles {
+  public fontFamily: string = 'Arial';
+  public fontSize: number = 12;
+  public position: string = 'absolute';
+  public backgroundColor: string = 'none';
+  public borderWidth: number = 0;
+  public borderColor: number = null;
+  public borderPosition: string = 'bottom';// around
+  public transformOrigin: string = '0 0';
+  public lineHeight: number = 1;
+
+  constructor(styles: FormInputStyles) {
+    for (const key in styles) {
+      this[key] = styles[key];
+    }
+  }
 }
 
-export class TextInput extends PIXI.Container {
-	constructor(options) {
+export class FormInput extends PIXI.Container {
+  private type: string = 'text';
+  private rules: FormInputRule[] = [];
+  private styles: FormInputStyles;
+
+	constructor(type: string, rules: FormInputRule[], styles: FormInputStyles) {
 		super();
-		this._type = options.type || 'text';
-		this._placeholder = options.placeholder;
+
+		this.type = type;
+		this.rules = rules;
+		this.styles = new FormInputStyles(styles);
+
+		if (this._input_style.type) {
+			delete this._input_style.type;
+		}
+
+		if (options.box) {
+			this._box_generator = typeof options.box === 'function' ? options.box : new DefaultBoxGenerator(options.box);
+		} else {
+			this._box_generator = null;
+		}
+
 		this._rules = options.rules || [];
-		this._styles = Object.assign(
-			{
-				position: 'absolute',
-				backgroundColor: 0xFFFFFF,
-				transformOrigin: '0 0',
-				outline: 'none',
-				border: 'none',
-				lineHeight: '1',
-			},
-			options.styles || new TextInputStyles({})
-		);
 
-		this._box_generator = new BoxGenerator({
-			error: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: 0xFF0000, width: this._styles.border.width } },
-			valid: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: 0x00FF00, width: this._styles.border.width } },
-			default: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: this._styles.border.color, width: this._styles.border.width } },
-			focused: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: this._styles.border.color, width: this._styles.border.width } },
-			disabled: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius }
-		});
-
-		if (this._styles.hasOwnProperty('multiline')) {
-			this._multiline = !!this._styles.multiline;
-			delete this._styles.multiline;
+		if (this._input_style.hasOwnProperty('multiline')) {
+			this._multiline = !!this._input_style.multiline;
+			delete this._input_style.multiline;
 		} else {
 			this._multiline = false;
 		}
@@ -49,6 +61,7 @@ export class TextInput extends PIXI.Container {
 		this._previous = {};
 		this._dom_added = false;
 		this._dom_visible = true;
+		this._placeholder = '';
 		this._placeholderColor = 0xa9a9a9;
 		this._selection = [0, 0];
 		this._restrict_value = '';
@@ -57,7 +70,6 @@ export class TextInput extends PIXI.Container {
 		this._setState('DEFAULT');
 		this._addListeners();
 	}
-
 
 	// GETTERS & SETTERS
 
@@ -73,10 +85,10 @@ export class TextInput extends PIXI.Container {
 		this._substituted = substitute;
 
 		if (substitute) {
-			this._createPIXIField();
+			this._createSurrogate();
 			this._dom_visible = false;
 		} else {
-			this._destroyPIXIField();
+			this._destroySurrogate();
 			this._dom_visible = true;
 		}
 
@@ -91,7 +103,7 @@ export class TextInput extends PIXI.Container {
 	set placeholder(text) {
 		this._placeholder = text;
 		if (this._substituted) {
-			this._updatePIXIField();
+			this._updateSurrogate();
 			this._dom_input.placeholder = '';
 		} else {
 			this._dom_input.placeholder = text;
@@ -148,7 +160,7 @@ export class TextInput extends PIXI.Container {
 	set text(text) {
 		this._dom_input.value = text;
 		if (this._substituted) {
-			this._updatePIXIField();
+			this._updateSurrogate();
 		}
 	}
 
@@ -173,21 +185,9 @@ export class TextInput extends PIXI.Container {
 		this._dom_input.select();
 	}
 
-	setInputStyle(key, value, updateStyle) {
+	setInputStyle(key, value) {
+		this._input_style[key] = value;
 		this._dom_input.style[key] = value;
-		this._dom_copy.style[key] = value;
-		var valueWithUnity = ['fontSize', 'padding', 'width'];
-		if (typeof value !== 'number' && valueWithUnity.includes(key)) {
-			value = parseInt(value.replace('px', ''));
-		}
-		if (updateStyle === true) {
-			this._styles[key] = value;
-		}
-
-		if (key === 'padding') {
-			this._dom_copy.style.width = this._dom_copy.style.width - (this._dom_copy.style.padding * 2);
-			this._dom_copy.style.padding = 0;
-		}
 
 		if (this._substituted && (key === 'fontFamily' || key === 'fontSize')) {
 			this._updateFontMetrics();
@@ -207,33 +207,16 @@ export class TextInput extends PIXI.Container {
 	// SETUP
 
 	_createDOMInput() {
-		var id = new Date().getTime();
 		if (this._multiline) {
 			this._dom_input = document.createElement('textarea');
 			this._dom_input.style.resize = 'none';
 		} else {
 			this._dom_input = document.createElement('input');
-			this._dom_input.id = `input_${id}`;
 			this._dom_input.type = this._type;
 		}
 
-		this._dom_copy = document.createElement('p');
-		this._dom_copy.id = `copy_${id}`;
-		this._dom_copy.style.textAlign = 'left';
-		this._dom_copy.style.overflow = 'hidden';
-		this._dom_copy.style.whiteSpace = 'nowrap';
-
-		this._updateDOMStyle();
-	}
-
-	_updateDOMStyle() {
-		var valueWithUnity = ['fontSize', 'padding', 'width'];
-		for (let key in this._styles) {
-			var value = this._styles[key];
-			if (typeof value === 'number' && valueWithUnity.includes(key)) {
-				value += 'px';
-			}
-			this.setInputStyle(key, value);
+		for (let key in this._input_style) {
+			this._dom_input.style[key] = this._input_style[key];
 		}
 	}
 
@@ -242,11 +225,10 @@ export class TextInput extends PIXI.Container {
 		this.on('removed', this._onRemoved.bind(this));
 
 		this._dom_input.addEventListener('keydown', this._onInputKeyDown.bind(this));
-		this._dom_input.addEventListener('click', this._onInputKeyDown.bind(this));
 		this._dom_input.addEventListener('input', this._onInputInput.bind(this));
 		this._dom_input.addEventListener('keyup', this._onInputKeyUp.bind(this));
-		this._dom_input.addEventListener('focus', this._onFocused.bind(this));
-		this._dom_input.addEventListener('blur', this._onBlurred.bind(this));
+		// this._dom_input.addEventListener('focus', this._onFocused.bind(this));
+		// this._dom_input.addEventListener('blur', this._onBlurred.bind(this));
 	}
 
 	_onInputKeyDown(e) {
@@ -254,7 +236,7 @@ export class TextInput extends PIXI.Container {
 			this._dom_input.selectionStart,
 			this._dom_input.selectionEnd,
 		];
-		this._updateCaret();
+
 		this.emit('keydown', e.keyCode);
 	}
 
@@ -267,8 +249,6 @@ export class TextInput extends PIXI.Container {
 			this._updateSubstitution();
 		}
 
-		this._updateCaret();
-		this._updateDOMCopy();
 		this.emit('input', this.text);
 	}
 
@@ -289,9 +269,7 @@ export class TextInput extends PIXI.Container {
 
 	_onAdded() {
 		document.body.appendChild(this._dom_input);
-		document.body.appendChild(this._dom_copy);
 		this._dom_input.style.display = 'none';
-		this._dom_copy.style.display = 'none';
 		this._dom_added = true;
 	}
 
@@ -310,7 +288,7 @@ export class TextInput extends PIXI.Container {
 
 	// Allows to check email, number, string and min length
 	_checkRules() {
-		const emailRegexp = /^([a-z0-9-_]+){2}@([a-z0-9-_]+){2}\.([a-z]+){2}$/;
+		const emailRegexp = /([a-z0-9-_]+){2}@([a-z0-9-_]+){2}\.([a-z]+){2}/;
 		const numberRegexp = /^\d+$/;
 		const stringRegexp = /^(?:.*[A-Za-z])$/;
 
@@ -319,48 +297,46 @@ export class TextInput extends PIXI.Container {
 		for (let i = 0, li = this._rules.length; i < li; i++) {
 			const rule = this._rules[i];
 
-			if (!rule.type) {
-				if (!rule.validator) {
-					console.warn('you must set validate function to performed');
+			if (rule.type === 'required') {
+				if (!this.text || !this.text.trim().length) {
+					state = 'ERROR';
 				} else {
-					if (!rule.validator(this.text)) {
-						state = 'ERROR';
-					}
+					continue;
 				}
-			} else {
-				if (rule.type === 'required') {
-					if (!this.text || !this.text.trim().length) {
+			}
+
+			if (this.text) {
+				if (rule.type === 'email') {
+					if (!emailRegexp.test(this.text)) {
 						state = 'ERROR';
 					} else {
 						continue;
 					}
-				}
-
-				if (this.text) {
-					if (rule.type === 'email') {
-						if (!emailRegexp.test(this.text)) {
+				} else if (rule.type === 'number') {
+					if (!numberRegexp.test(this.text)) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else if (rule.type === 'string') {
+					if (!stringRegexp.test(this.text)) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else if (rule.type.includes('min:')) {
+					const minLength = parseInt(rule.type.replace('min:', ''));
+					if (this.text.length < minLength) {
+						state = 'ERROR';
+					} else {
+						continue;
+					}
+				} else {
+					if (!rule.validate) {
+						console.warn('you must set validate function to performed');
+					} else {
+						if (!rule.validate(this.text)) {
 							state = 'ERROR';
-						} else {
-							continue;
-						}
-					} else if (rule.type === 'number') {
-						if (!numberRegexp.test(this.text)) {
-							state = 'ERROR';
-						} else {
-							continue;
-						}
-					} else if (rule.type === 'string') {
-						if (!stringRegexp.test(this.text)) {
-							state = 'ERROR';
-						} else {
-							continue;
-						}
-					} else if (rule.type.includes('min:')) {
-						const minLength = parseInt(rule.type.replace('min:', ''));
-						if (this.text.length < minLength) {
-							state = 'ERROR';
-						} else {
-							continue;
 						}
 					}
 				}
@@ -408,68 +384,10 @@ export class TextInput extends PIXI.Container {
 
 	_update() {
 		this._updateDOMInput();
-		this._createCaret();
 		if (this._substituted) {
-			this._updatePIXIField();
+			this._updateSurrogate();
 		}
 		this._updateBox();
-	}
-
-	_updateDOMCopy() {
-		const text = this.text.split('');
-		const domText = text.map((letter) => {
-			if (this._type !== 'password') {
-				if (letter === ' ') {
-					letter = '&nbsp;';
-				}
-			} else {
-				letter = '•';
-			}
-			return `<span style="display:inline-block;">${letter}</span>`;
-		});
-		this._dom_copy.innerHTML = domText.join('');
-	}
-
-	_updateCaret() {
-		setTimeout(() => {
-			let caretX = this._styles.padding;
-
-			if (this._dom_copy.childNodes.length && this._dom_input.selectionEnd) {
-				const lastSpan = this._dom_copy.childNodes[this._dom_input.selectionEnd - 1];
-				const diff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
-
-				if (diff < 0) {
-					caretX = caretX + this._dom_copy.offsetWidth;
-				} else {
-					caretX = caretX + lastSpan.offsetLeft + lastSpan.offsetWidth;
-				}
-			}
-
-			this._caret.x = caretX;
-			this._caret.y = this._styles.padding;
-			this._caret.height = this._font_metrics.fontSize + 4;
-			this._updatePIXIField();
-		}, 50);
-	}
-
-	_updateCaretPosition(x) {
-	}
-
-	_createCaret() {
-		if (this._caret) {
-			this._updateCaret();
-			return;
-		}
-
-		this._caret = new Caret({
-			fill: 0x333333,
-			width: 2,
-			height: this._font_metrics.fontSize,
-		});
-
-		this._caret.visible = false;
-
-		this.addChild(this._caret);
 	}
 
 	_updateBox() {
@@ -498,21 +416,13 @@ export class TextInput extends PIXI.Container {
 	_updateSubstitution() {
 		if (this.state === 'FOCUSED') {
 			this._dom_visible = true;
-			// this._pixi_field.visible = false;
-			if (this._caret) {
-				this._caret.visible = true;
-			}
+			this._surrogate.visible = this.text.length === 0;
 		} else {
-			// this._dom_visible = false;
-			// this._pixi_field.visible = true;
-			if (this._caret) {
-				this._caret.visible = false;
-			}
+			this._dom_visible = false;
+			this._surrogate.visible = true;
 		}
-		// this._dom_visible = true;
-		// this._pixi_field.visible = true;
 		this._updateDOMInput();
-		this._updatePIXIField();
+		this._updateSurrogate();
 	}
 
 	_updateDOMInput() {
@@ -520,18 +430,11 @@ export class TextInput extends PIXI.Container {
 			return;
 		}
 
-		this._dom_input.style.zIndex = -10;
-		this._dom_input.style.top = (this._canvas_bounds.top + this.height || 0) + 'px';
-		this._dom_input.style.left = (this._canvas_bounds.left || 0) + 'px';
+		this._dom_input.style.top = (this._canvas_bounds.top + 200 || 0) + 'px';
+		this._dom_input.style.left = (this._canvas_bounds.left + 200 || 0) + 'px';
 		this._dom_input.style.transform = this._pixiMatrixToCSS(this._getDOMRelativeWorldTransform());
 		this._dom_input.style.opacity = this.worldAlpha;
 		this._setDOMInputVisible(this.worldVisible && this._dom_visible);
-
-		this._dom_copy.style.zIndex = -10;
-		this._dom_copy.style.top = (this._canvas_bounds.top + (this.height * 2) || 0) + 'px';
-		this._dom_copy.style.left = (this._canvas_bounds.left || 0) + 'px';
-		this._dom_copy.style.transform = this._pixiMatrixToCSS(this._getDOMRelativeWorldTransform());
-		this._dom_copy.style.opacity = this.worldAlpha;
 
 		this._previous.canvas_bounds = this._canvas_bounds;
 		this._previous.world_transform = this.worldTransform.clone();
@@ -570,97 +473,86 @@ export class TextInput extends PIXI.Container {
 
 	// INPUT SUBSTITUTION
 
-	_createPIXIField() {
-		this._pixi_field_hitbox = new PIXI.Graphics();
-		this._pixi_field_hitbox.alpha = 0;
-		this._pixi_field_hitbox.interactive = true;
-		this._pixi_field_hitbox.caret = 'text';
-		this._pixi_field_hitbox.on('pointerdown', this._onPIXIFieldFocus.bind(this));
-		this._pixi_field_hitbox.on('pointerupoutside', this.blur.bind(this));
-		this.addChild(this._pixi_field_hitbox);
+	_createSurrogate() {
+		this._surrogate_hitbox = new PIXI.Graphics();
+		this._surrogate_hitbox.alpha = 0;
+		this._surrogate_hitbox.interactive = true;
+		this._surrogate_hitbox.cursor = 'text';
+		this._surrogate_hitbox.on('pointerdown', this._onSurrogateFocus.bind(this));
+		this._surrogate_hitbox.on('pointeroutside', this.blur.bind(this));
+		this.addChild(this._surrogate_hitbox);
 
-		this._pixi_field_mask = new PIXI.Graphics();
-		this.addChild(this._pixi_field_mask);
+		this._surrogate_mask = new PIXI.Graphics();
+		this.addChild(this._surrogate_mask);
 
-		this._pixi_field = new PIXI.Text('', {});
-		this.addChild(this._pixi_field);
+		this._surrogate = new PIXI.Text('', {});
+		this.addChild(this._surrogate);
 
-		this._pixi_field.mask = this._pixi_field_mask;
+		this._surrogate.mask = this._surrogate_mask;
 
 		this._updateFontMetrics();
-		this._updatePIXIField();
+		this._updateSurrogate();
 	}
 
-	_updatePIXIField() {
-		let padding = this._derivePIXIFieldPadding();
+	_updateSurrogate() {
+		let padding = this._deriveSurrogatePadding();
 		let input_bounds = this._getDOMInputBounds();
 
-		this._pixi_field.alpha = this.state === 'DISABLED' ? 0.6 : 1;
-		this._pixi_field.style = this._derivePIXIFieldStyle();
-		this._pixi_field.style.padding = Math.max.apply(Math, padding);
-		this._pixi_field.y = this._multiline ? padding[0] : (input_bounds.height - this._pixi_field.height) / 2;
-		this._pixi_field.text = this._derivePIXIFieldText();
+		this._surrogate.style = this._deriveSurrogateStyle();
+		this._surrogate.style.padding = Math.max.apply(Math, padding);
+		this._surrogate.y = this._multiline ? padding[0] : (input_bounds.height - this._surrogate.height) / 2;
+		this._surrogate.x = padding[3];
+		this._surrogate.text = this._deriveSurrogateText();
 
-		let fieldX = padding[3];
-		switch (this._pixi_field.style.align) {
+		switch (this._surrogate.style.align) {
 			case 'left':
-				fieldX = padding[3];
+				this._surrogate.x = padding[3];
 				break
 
 			case 'center':
-				fieldX = input_bounds.width * 0.5 - this._pixi_field.width * 0.5;
+				this._surrogate.x = input_bounds.width * 0.5 - this._surrogate.width * 0.5;
 				break
 
 			case 'right':
-				fieldX = input_bounds.width - padding[1] - this._pixi_field.width;
+				this._surrogate.x = input_bounds.width - padding[1] - this._surrogate.width;
 				break
 		}
 
-		let diff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
-		if (diff < 0) {
-			// if (this._caret) {
-			// 	diff = this._caret.x - this._dom_copy.scrollWidth;
-			// }
-			this._pixi_field.x = fieldX + diff;
-		} else {
-			this._pixi_field.x = fieldX;
-		}
-
-		this._updatePIXIFieldHitbox(input_bounds);
-		this._updatePIXIFieldMask(input_bounds, padding);
+		this._updateSurrogateHitbox(input_bounds);
+		this._updateSurrogateMask(input_bounds, padding);
 	}
 
-	_updatePIXIFieldHitbox(bounds) {
-		this._pixi_field_hitbox.clear();
-		this._pixi_field_hitbox.beginFill(0);
-		this._pixi_field_hitbox.drawRect(0, 0, bounds.width, bounds.height);
-		this._pixi_field_hitbox.endFill();
-		this._pixi_field_hitbox.interactive = !this._disabled;
+	_updateSurrogateHitbox(bounds) {
+		this._surrogate_hitbox.clear();
+		this._surrogate_hitbox.beginFill(0);
+		this._surrogate_hitbox.drawRect(0, 0, bounds.width, bounds.height);
+		this._surrogate_hitbox.endFill();
+		this._surrogate_hitbox.interactive = !this._disabled;
 	}
 
-	_updatePIXIFieldMask(bounds, padding) {
-		this._pixi_field_mask.clear();
-		this._pixi_field_mask.beginFill(0);
-		this._pixi_field_mask.drawRect(padding[3], 0, bounds.width - padding[3] - padding[1], bounds.height);
-		this._pixi_field_mask.endFill();
+	_updateSurrogateMask(bounds, padding) {
+		this._surrogate_mask.clear();
+		this._surrogate_mask.beginFill(0);
+		this._surrogate_mask.drawRect(padding[3], 0, bounds.width - padding[3] - padding[1], bounds.height);
+		this._surrogate_mask.endFill();
 	}
 
-	_destroyPIXIField() {
-		if (!this._pixi_field) {
+	_destroySurrogate() {
+		if (!this._surrogate) {
 			return;
 		}
 
-		this.removeChild(this._pixi_field);
-		this.removeChild(this._pixi_field_hitbox);
+		this.removeChild(this._surrogate);
+		this.removeChild(this._surrogate_hitbox);
 
-		this._pixi_field.destroy();
-		this._pixi_field_hitbox.destroy();
+		this._surrogate.destroy();
+		this._surrogate_hitbox.destroy();
 
-		this._pixi_field = null;
-		this._pixi_field_hitbox = null;
+		this._surrogate = null;
+		this._surrogate_hitbox = null;
 	}
 
-	_onPIXIFieldFocus() {
+	_onSurrogateFocus() {
 		this._setDOMInputVisible(true);
 		//sometimes the input is not being focused by the mouseclick
 		setTimeout(this._ensureFocus.bind(this), 10);
@@ -672,13 +564,13 @@ export class TextInput extends PIXI.Container {
 		}
 	}
 
-	_derivePIXIFieldStyle() {
+	_deriveSurrogateStyle() {
 		let style = new PIXI.TextStyle();
 
-		for (var key in this._styles) {
+		for (var key in this._input_style) {
 			switch (key) {
 				case 'color':
-					style.fill = this._styles.color;
+					style.fill = this._input_style.color;
 					break
 
 				case 'fontFamily':
@@ -686,15 +578,15 @@ export class TextInput extends PIXI.Container {
 				case 'fontWeight':
 				case 'fontVariant':
 				case 'fontStyle':
-					style[key] = this._styles[key];
+					style[key] = this._input_style[key];
 					break
 
 				case 'letterSpacing':
-					style.letterSpacing = parseFloat(this._styles.letterSpacing);
+					style.letterSpacing = parseFloat(this._input_style.letterSpacing);
 					break
 
 				case 'textAlign':
-					style.align = this._styles.textAlign;
+					style.align = this._input_style.textAlign;
 					break
 			}
 		}
@@ -712,12 +604,11 @@ export class TextInput extends PIXI.Container {
 		return style;
 	}
 
-	_derivePIXIFieldPadding() {
-		let indent = this._styles.textIndent ? parseFloat(this._styles.textIndent) : 0
-		const padding = this._styles.padding
+	_deriveSurrogatePadding() {
+		let indent = this._input_style.textIndent ? parseFloat(this._input_style.textIndent) : 0
 
-		if (padding) {
-			let components = typeof padding === 'string' ? padding.trim().split(' ') : [padding + 'px'];
+		if (this._input_style.padding && this._input_style.padding.length > 0) {
+			let components = this._input_style.padding.trim().split(' ')
 
 			if (components.length === 1) {
 				let padding = parseFloat(components[0]);
@@ -740,7 +631,7 @@ export class TextInput extends PIXI.Container {
 		return [0, 0, 0, indent];
 	}
 
-	_derivePIXIFieldText() {
+	_deriveSurrogateText() {
 		if (this._dom_input.value.length === 0) {
 			return this._placeholder;
 		}
@@ -753,7 +644,7 @@ export class TextInput extends PIXI.Container {
 	}
 
 	_updateFontMetrics() {
-		const style = this._derivePIXIFieldStyle();
+		const style = this._deriveSurrogateStyle();
 		const font = style.toFontString();
 
 		this._font_metrics = PIXI.TextMetrics.measureFont(font);
@@ -804,7 +695,6 @@ export class TextInput extends PIXI.Container {
 
 	_setDOMInputVisible(visible) {
 		this._dom_input.style.display = visible ? 'block' : 'none';
-		this._dom_copy.style.display = visible ? 'block' : 'none';
 	}
 
 	_getCanvasBounds() {
@@ -827,13 +717,9 @@ export class TextInput extends PIXI.Container {
 		let org_display = this._dom_input.style.display;
 		this._dom_input.style.transform = '';
 		this._dom_input.style.display = 'block';
-		this._dom_copy.style.transform = '';
-		this._dom_copy.style.display = 'block';
 		let bounds = this._dom_input.getBoundingClientRect();
 		this._dom_input.style.transform = org_transform;
 		this._dom_input.style.display = org_display;
-		this._dom_copy.style.transform = org_transform;
-		this._dom_copy.style.display = org_display;
 
 		if (remove_after) {
 			document.body.removeChild(this._dom_input);
@@ -885,23 +771,9 @@ export class TextInput extends PIXI.Container {
 	}
 }
 
-class Caret extends PIXI.Graphics {
-	constructor(options) {
-		super();
+function DefaultBoxGenerator(options) {
+	options = options || { fill: 0xcccccc };
 
-		this.offsetLeft = 0;
-		this.alpha = 0.8;
-		this.beginFill(options.fill);
-		this.drawRect(0, 0, options.width, options.height);
-		this.endFill();
-		this.closePath();
-
-		gsap.registerPlugin(PixiPlugin);
-		gsap.to(this, { alpha: 0, duration: 0.4, loop: true, ease: "power1.inOut", repeat: -1, yoyo: true });
-	}
-}
-
-function BoxGenerator(options) {
 	if (options.default) {
 		options.focused = options.focused || options.default;
 		options.disabled = options.disabled || options.default;
@@ -924,8 +796,7 @@ function BoxGenerator(options) {
 				box.lineStyle(
 					style.stroke.width || 1,
 					style.stroke.color || 0,
-					style.stroke.alpha || 1,
-					1
+					style.stroke.alpha || 1
 				);
 			}
 
@@ -942,3 +813,42 @@ function BoxGenerator(options) {
 		}
 	}
 }
+
+// const styles = new FormInputStyles();
+// new PIXI.form.TextInput({
+// 	fontFamily: 'Arial',
+// 	fontSize: 36,
+// 	padding: 12,
+// 	width: 500,
+// 	borderRadius: 5,
+// 	backgroundColor: 0xE8E9F3,
+// 	underline: {
+// 		error: 0xFF0000,
+// 		valid: 0x00FF00,
+// 		default: 0xCBCEE0,
+// 	},
+// 	color: 0x26272E,
+// 	type: 'password',
+// }, [
+// 	{
+// 		type: 'required',
+// 		onError: function() {
+// 			console.log('input required');
+// 		}
+// 	},
+// 	{
+// 		type: 'min:3',
+// 		onError: function() {
+// 			console.log('input min 3 chars');
+// 		}
+// 	},
+// 	{
+// 		type: 'regexp',
+// 		validate: function(value) {
+// 			return value === 'password';
+// 		},
+// 		onError: function() {
+// 			console.log('it must be entered password');
+// 		}
+// 	},
+// ]);

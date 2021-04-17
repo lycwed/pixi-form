@@ -1,30 +1,39 @@
 /// <reference types="pixi.js" />
 
 declare namespace PIXI {
-  declare namespace form {
+  namespace form {
     export type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
     export type TextInputRule = {
-      type: string;
-      onError: () => void;
+      onFail: () => void;
+      type?: string;
       validate?: (value: any) => boolean;
     };
 
     export type TextInputOptions = {
+      width: number;
+      color?: number;
+      padding?: number;
+      fontSize?: number;
+      fontFamily?: number;
+      backgroundColor?: number;
       position?: string;
-      background?: string;
-      border?: string;
+      backgroundColor?: number;
+      border?: {
+        color: number;
+        width: number;
+        radius: number;
+      };
       outline?: string;
       lineHeight?: string;
       multiline?: boolean;
-      box?: any;
-      input?: any;
-      type?: string;
-      rules?: TextInputRule[];
     }
 
     export class TextInput extends PIXI.Container {
-      _input_style: TextInputOptions;
+      _type: string;
+      _placeholder: string;
+      _rules: TextInputRule[];
+      _styles: TextInputOptions;
       _box_generator: any;
       _box_cache: object;
       _previous: object;
@@ -39,8 +48,6 @@ declare namespace PIXI {
       _substituted: string;
       _disabled: boolean;
       _max_length: number;
-      _type: string;
-      _rules: TextInputRule[];
       state: STATUS;
 
       constructor(options?: TextInputOptions);

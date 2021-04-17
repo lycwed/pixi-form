@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/lycwed/text-input-plus#readme",
   "dependencies": {
+    "gsap": "^3.6.1",
     "pixi.js": "^5.3.9"
   },
   "devDependencies": {

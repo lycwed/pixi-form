@@ -17,7 +17,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Text Input Plus Demo',
+      title: 'PIXI form demo',
       template: path.resolve(__dirname, 'demo/index.html'),
       filename: path.resolve(__dirname, 'www/index.html'),
       base: '/',

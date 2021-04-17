@@ -4,16 +4,18 @@
 This plugin is based on mwni.io TextInput PIXI plugin.
 
 I introduce:
-    - the input type password  
-    - the notion of rules to validate an input and the box colorization on blur.
-    - d.ts file.
+
+- the input type password  
+- the notion of rules to validate an input and the box colorization on blur.
+- d.ts file.
 
 Some validation rules are already integrated:
-    - required
-    - email
-    - number
-    - string
-    - min:{number} (min:3)
+
+- required
+- email
+- number
+- string
+- min:{number} (min:3)
 
 And if it's not enough you can set your own validator!
 
@@ -21,55 +23,102 @@ And if it's not enough you can set your own validator!
 
 Created with PIXI v5.3.9.
 
-`npm i -S pixi-text-input-plus`
+`npm i -S pixi-form`
 
 # Usage
 
 ```ts
 import * as PIXI from 'pixi.js';
-import 'pixi-text-input-plus';
+import gsap from 'gsap';
+import 'pixi-form';
 
-const input = PIXI.TextInput({
-    input: {
-        fontFamily: 'Arial',
-        fontSize: '36px',
-        padding: '12px',
-        width: '500px',
-        color: '#26272E',
-        type: 'password', // 'text' by default
+var width = 1000;
+var height = 600;
+var app = new PIXI.Application(
+    { 
+        width: width,
+        height: height,
+        antialias: true,
+        backgroundColor: 0xffffff,
+        resolution: window.devicePixelRatio || 1
+    }
+);
+
+document.getElementById('canvas-placeholder').appendChild(app.view)
+
+var styles = new PIXI.form.TextInputStyles({
+    fontFamily: 'Arial',
+    fontSize: 36,
+    padding: 12,
+    width: 500,
+    color: 0x333333,
+    backgroundColor: 0xEFEFEF,
+    border: {
+        radius: 4,
+        width: 2,
+        color: 0xACACAC,
     },
-    box: {
-        error: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xFF0000, width: 3}},
-        valid: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0x00FF00, width: 3}},
-        default: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xCBCEE0, width: 3}},
-        focused: {fill: 0xE1E3EE, rounded: 12, stroke: {color: 0xABAFC6, width: 3}},
-        disabled: {fill: 0xDBDBDB, rounded: 12}
-    },
+});
+
+var email = new PIXI.form.TextInput({
+type: 'text',
+placeholder: 'Enter your email...',
+    styles: styles,
     rules: [
         {
             type: 'required',
-            onError: function() {
-                // What you want on error
-                console.log('input required');
+            onFail: function() {
+                console.log('Email required');
+            }
+        },
+        {
+            type: 'email',
+            onFail: function() {
+                console.log('Email not correct');
+            }
+        },
+    ]
+});
+
+var password = new PIXI.form.TextInput({
+type: 'password',
+placeholder: 'Enter your password...',
+    styles: styles,
+    rules: [
+        {
+            type: 'required',
+            onFail: function() {
+                console.log('Password required');
             }
         },
         {
             type: 'min:3',
-            onError: function() {
-                // What you want on error
-                console.log('input min 3 chars');
+            onFail: function() {
+                console.log('Password min 3 chars');
             }
         },
         {
-            type: 'regexp',
-            validate: function(value) {
+            validator: function(value) {
                 return value === 'password';
             },
-            onError: function() {
-                // What you want on error
+            onFail: function() {
                 console.log('it must be entered password');
             }
         },
     ]
 });
+
+email.x = width / 2;
+email.y = height / 2;
+email.pivot.x = email.width / 2;
+email.pivot.y = email.height / 2;
+
+password.x = width / 2;
+password.y = email.y + email.height + 20;
+password.pivot.x = password.width / 2;
+password.pivot.y = password.height / 2;
+
+console.log(email, password);
+
+app.stage.addChild(email, password);
 ```

@@ -1,8 +1,9 @@
-var TextInput = require("./pixi-form");
+var Form = require("./pixi-form");
 
 Object.assign(PIXI, {
   form: {
-    TextInput: TextInput.default,
+    TextInput: Form.TextInput,
+    TextInputStyles: Form.TextInputStyles,
   },
 });
 

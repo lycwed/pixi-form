@@ -4,7 +4,10 @@
 	<meta charset="UTF-8">
 	<title></title>
   <link rel="stylesheet" href="assets/styles.css"></link>
-  <script src="assets/pixi.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.9/pixi.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/PixiPlugin.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
 </head>
 
 <body onload="init()">
@@ -44,147 +47,232 @@
 
 	<div class="source">
     <pre>
-      <span style='color:#800000; font-weight:bold; '>var</span> app
-      <span style='color:#800000; font-weight:bold; '>var</span> <span style='color:#797997; '>input</span>
+			<code class="javascript">
+var width = 1000;
+var height = 600;
+var app = new PIXI.Application(
+	{ 
+		width: width,
+		height: height,
+		antialias: true,
+		backgroundColor: 0xffffff,
+		resolution: window.devicePixelRatio || 1
+	}
+);
 
-      <span style='color:#800000; font-weight:bold; '>function</span> init<span style='color:#808030; '>(</span><span style='color:#808030; '>)</span><span style='color:#800080; '>{</span>
-        app <span style='color:#808030; '>=</span> <span style='color:#800000; font-weight:bold; '>new</span> PIXI<span style='color:#808030; '>.</span>Application<span style='color:#808030; '>(</span>
-          <span style='color:#800080; '>{</span> 
-            width<span style='color:#800080; '>:</span> <span style='color:#008c00; '>1000</span><span style='color:#808030; '>,</span>
-            height<span style='color:#800080; '>:</span> <span style='color:#008c00; '>600</span><span style='color:#808030; '>,</span>
-            antialias<span style='color:#800080; '>:</span> <span style='color:#0f4d75; '>true</span><span style='color:#808030; '>,</span>
-            backgroundColor<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xffffff</span>
-          <span style='color:#800080; '>}</span>
-        <span style='color:#808030; '>)</span>
-        document<span style='color:#808030; '>.</span>getElementById<span style='color:#808030; '>(</span><span style='color:#800000; '>'</span><span style='color:#0000e6; '>canvas-placeholder</span><span style='color:#800000; '>'</span><span style='color:#808030; '>)</span><span style='color:#808030; '>.</span>appendChild<span style='color:#808030; '>(</span>app<span style='color:#808030; '>.</span>view<span style='color:#808030; '>)</span>
+document.getElementById('canvas-placeholder').appendChild(app.view)
 
+var styles = new PIXI.form.TextInputStyles({
+	fontFamily: 'Arial',
+	fontSize: 36,
+	padding: 12,
+	width: 500,
+	color: 0x333333,
+	backgroundColor: 0xEFEFEF,
+	border: {
+		radius: 4,
+		width: 2,
+		color: 0xACACAC,
+	},
+});
 
-        <span style='color:#797997; '>input</span> <span style='color:#808030; '>=</span> <span style='color:#800000; font-weight:bold; '>new</span> PIXI<span style='color:#808030; '>.</span>TextInput<span style='color:#808030; '>(</span><span style='color:#800080; '>{</span>
-          <span style='color:#797997; '>input</span><span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>
-            fontSize<span style='color:#800080; '>:</span> <span style='color:#800000; '>'</span><span style='color:#0000e6; '>36px</span><span style='color:#800000; '>'</span><span style='color:#808030; '>,</span>
-            padding<span style='color:#800080; '>:</span> <span style='color:#800000; '>'</span><span style='color:#0000e6; '>12px</span><span style='color:#800000; '>'</span><span style='color:#808030; '>,</span>
-            width<span style='color:#800080; '>:</span> <span style='color:#800000; '>'</span><span style='color:#0000e6; '>500px</span><span style='color:#800000; '>'</span><span style='color:#808030; '>,</span>
-            color<span style='color:#800080; '>:</span> <span style='color:#800000; '>'</span><span style='color:#0000e6; '>#26272E</span><span style='color:#800000; '>'</span>
-          <span style='color:#800080; '>}</span><span style='color:#808030; '>,</span>
-          box<span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>
-            <span style='color:#800000; font-weight:bold; '>default</span><span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>fill<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xE8E9F3</span><span style='color:#808030; '>,</span> rounded<span style='color:#800080; '>:</span> <span style='color:#008c00; '>12</span><span style='color:#808030; '>,</span> stroke<span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>color<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xCBCEE0</span><span style='color:#808030; '>,</span> width<span style='color:#800080; '>:</span> <span style='color:#008c00; '>3</span><span style='color:#800080; '>}</span><span style='color:#800080; '>}</span><span style='color:#808030; '>,</span>
-            focused<span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>fill<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xE1E3EE</span><span style='color:#808030; '>,</span> rounded<span style='color:#800080; '>:</span> <span style='color:#008c00; '>12</span><span style='color:#808030; '>,</span> stroke<span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>color<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xABAFC6</span><span style='color:#808030; '>,</span> width<span style='color:#800080; '>:</span> <span style='color:#008c00; '>3</span><span style='color:#800080; '>}</span><span style='color:#800080; '>}</span><span style='color:#808030; '>,</span>
-            disabled<span style='color:#800080; '>:</span> <span style='color:#800080; '>{</span>fill<span style='color:#800080; '>:</span> <span style='color:#008000; '>0xDBDBDB</span><span style='color:#808030; '>,</span> rounded<span style='color:#800080; '>:</span> <span style='color:#008c00; '>12</span><span style='color:#800080; '>}</span>
-          <span style='color:#800080; '>}</span>
-        <span style='color:#800080; '>}</span><span style='color:#808030; '>)</span>
-        
-        <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>placeholder <span style='color:#808030; '>=</span> <span style='color:#800000; '>'</span><span style='color:#0000e6; '>Enter your Text...</span><span style='color:#800000; '>'</span>
-        <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>x <span style='color:#808030; '>=</span> <span style='color:#008c00; '>500</span>
-        <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>y <span style='color:#808030; '>=</span> <span style='color:#008c00; '>300</span>
-        <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>pivot<span style='color:#808030; '>.</span>x <span style='color:#808030; '>=</span> <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>width<span style='color:#808030; '>/</span><span style='color:#008c00; '>2</span>
-        <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>pivot<span style='color:#808030; '>.</span>y <span style='color:#808030; '>=</span> <span style='color:#797997; '>input</span><span style='color:#808030; '>.</span>height<span style='color:#808030; '>/</span><span style='color:#008c00; '>2</span>
-        app<span style='color:#808030; '>.</span>stage<span style='color:#808030; '>.</span>addChild<span style='color:#808030; '>(</span><span style='color:#797997; '>input</span><span style='color:#808030; '>)</span>
-      <span style='color:#800080; '>}</span>
+var email = new PIXI.form.TextInput({
+	type: 'text',
+	placeholder: 'Enter your email...',
+	styles: styles,
+	rules: [
+		{
+			type: 'required',
+			onFail: function() {
+				console.log('Email required');
+			}
+		},
+		{
+			type: 'email',
+			onFail: function() {
+				console.log('Email not correct');
+			}
+		},
+	]
+});
+
+var password = new PIXI.form.TextInput({
+	type: 'password',
+	placeholder: 'Enter your password...',
+	styles: styles,
+	rules: [
+		{
+			type: 'required',
+			onFail: function() {
+				console.log('Password required');
+			}
+		},
+		{
+			type: 'min:3',
+			onFail: function() {
+				console.log('Password min 3 chars');
+			}
+		},
+		{
+			validator: function(value) {
+				return value === 'password';
+			},
+			onFail: function() {
+				console.log('it must be entered password');
+			}
+		},
+	]
+});
+
+email.x = width / 2;
+email.y = height / 2;
+email.pivot.x = email.width / 2;
+email.pivot.y = email.height / 2;
+
+password.x = width / 2;
+password.y = email.y + email.height + 20;
+password.pivot.x = password.width / 2;
+password.pivot.y = password.height / 2;
+
+app.stage.addChild(email, password);
+			</code>
     </pre>
 	</div>
 </body>
 
 <script type="text/javascript">
 
-var app
-var input
-var t = 0
+var app;
 
-function init(){
+function init() {
+	var width = 1000;
+	var height = 600;
 	app = new PIXI.Application(
 		{ 
-			width: 1000,
-			height: 600,
+			width: width,
+			height: height,
 			antialias: true,
 			backgroundColor: 0xffffff,
 			resolution: window.devicePixelRatio || 1
 		}
-	)
+	);
+
 	document.getElementById('canvas-placeholder').appendChild(app.view)
 
-	input = new PIXI.form.TextInput({
-		input: {
-			fontFamily: 'Arial',
-			fontSize: '36px',
-			padding: '12px',
-			width: '500px',
-			color: '#26272E',
-      type: 'password',
+	var styles = new PIXI.form.TextInputStyles({
+		fontFamily: 'Arial',
+		fontSize: 36,
+		padding: 12,
+		width: 500,
+		color: 0x333333,
+		backgroundColor: 0xEFEFEF,
+		border: {
+			radius: 4,
+			width: 2,
+			color: 0xACACAC,
 		},
-		box: {
-			error: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xFF0000, width: 3}},
-			valid: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0x00FF00, width: 3}},
-			default: {fill: 0xE8E9F3, rounded: 12, stroke: {color: 0xCBCEE0, width: 3}},
-			focused: {fill: 0xE1E3EE, rounded: 12, stroke: {color: 0xABAFC6, width: 3}},
-			disabled: {fill: 0xDBDBDB, rounded: 12}
-		},
+	});
+
+	var email = new PIXI.form.TextInput({
+    type: 'text',
+    placeholder: 'Enter your email...',
+		styles: styles,
 		rules: [
 			{
 				type: 'required',
-				onError: function() {
-					console.log('input required');
+				onFail: function() {
+					console.log('Email required');
+				}
+			},
+			{
+				type: 'email',
+				onFail: function() {
+					console.log('Email not correct');
+				}
+			},
+		]
+	});
+
+	var password = new PIXI.form.TextInput({
+    type: 'password',
+    placeholder: 'Enter your password...',
+		styles: styles,
+		rules: [
+			{
+				type: 'required',
+				onFail: function() {
+					console.log('Password required');
 				}
 			},
 			{
 				type: 'min:3',
-				onError: function() {
-					console.log('input min 3 chars');
+				onFail: function() {
+					console.log('Password min 3 chars');
 				}
 			},
 			{
-				type: 'regexp',
-				validate: function(value) {
+				validator: function(value) {
 					return value === 'password';
 				},
-				onError: function() {
+				onFail: function() {
 					console.log('it must be entered password');
 				}
 			},
 		]
 	});
 
-	input.placeholder = 'Enter your Text...'
-	input.x = 500
-	input.y = 300
-	input.pivot.x = input.width/2
-	input.pivot.y = input.height/2
-	app.stage.addChild(input)
+	email.x = width / 2;
+	email.y = height / 2;
+	email.pivot.x = email.width / 2;
+	email.pivot.y = email.height / 2;
 
-	setupDemoControls()
+	password.x = width / 2;
+	password.y = email.y + email.height + 20;
+	password.pivot.x = password.width / 2;
+	password.pivot.y = password.height / 2;
+
+	console.log(email, password);
+
+	app.stage.addChild(email, password);
+
+	setupDemoControls();
+
+	return app;
 }
 
 // DEMO CONTROLS
 
+var timer;
+
 function setAnimation(on){
-	if(on){
+	if (on) {
 		app.ticker.add(animateLoop)
-	}else{
+	} else {
 		app.ticker.remove(animateLoop)
-		t = 0
+		timer = 0
 		animateLoop()
 	}
 }
 
 function animateLoop(){
-	input.rotation = t/50
-	input.scale.x = 1+Math.sin(t/25)*0.3
-	input.scale.y = 1+Math.sin(t/32)*0.2
-	t++
+	input.rotation = timer/50
+	input.scale.x = 1+Math.sin(timer/25)*0.3
+	input.scale.y = 1+Math.sin(timer/32)*0.2
+	timer++
 }
-
 
 function setupDemoControls(){
 	document.getElementById('font').onchange = function(){
-		input.setInputStyle('fontFamily',this.value)
+		input.setInputStyle('fontFamily',this.value, true)
 	}
 	document.getElementById('size').onchange = function(){
-		input.setInputStyle('fontSize',this.value+'px')
+		input.setInputStyle('fontSize',this.value+'px', true)
 	}
 	document.getElementById('bold').onchange = function(){
-		input.setInputStyle('fontWeight',this.checked ? 'bold' : 'normal')
+		input.setInputStyle('fontWeight',this.checked ? 'bold' : 'normal', true)
 	}
 	document.getElementById('padding').onchange = function(){
-		input.setInputStyle('padding',this.value+'px')
+		input.setInputStyle('padding',this.value+'px', true)
 	}
 	document.getElementById('disable').onclick = function(){
 		this._toggle = !this._toggle
@@ -200,5 +288,9 @@ function setupDemoControls(){
 		this.value = this._toggle ? 'Ok, enough' : 'Animate'
 	}
 }
+
+hljs.configure({tabReplace: '    '})
+hljs.highlightAll();
+
 </script>
 </html>
