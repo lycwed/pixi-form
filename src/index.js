@@ -1,10 +1,11 @@
 var Form = require("./pixi-form");
-
-Object.assign(PIXI, {
+var plugin = {
   form: {
     TextInput: Form.TextInput,
     TextInputStyles: Form.TextInputStyles,
   },
-});
+};
 
-module.exports = PIXI.form;
+Object.assign(PIXI, plugin);
+
+module.exports = plugin;
