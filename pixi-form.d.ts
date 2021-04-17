@@ -1,4 +1,5 @@
 /// <reference types="pixi.js" />
+/// <reference types="gsap" />
 
 declare namespace PIXI {
   namespace form {
@@ -13,8 +14,9 @@ declare namespace PIXI {
     export type TextInputOptions = {
       type: string;
       placeholder: string;
-      rules: TextInputRule[];
-      styles: TextInputStyles;
+      rules?: TextInputRule[];
+      styles?: TextInputStyles;
+      gsap?: gsap;
     };
 
     export class TextInputStylesOptions {

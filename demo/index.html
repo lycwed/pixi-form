@@ -76,11 +76,15 @@ var styles = new PIXI.form.TextInputStyles({
 	},
 });
 
+// Optional
+gsap.registerPlugin(PixiPlugin);
+
 var email = new PIXI.form.TextInput({
 	type: 'text',
 	placeholder: 'Enter your email...',
-	styles: styles,
-	rules: [
+	styles: styles, // Optional
+	gsap: gsap, // Optional
+	rules: [ // Optional
 		{
 			type: 'required',
 			onFail: function() {
@@ -99,8 +103,9 @@ var email = new PIXI.form.TextInput({
 var password = new PIXI.form.TextInput({
 	type: 'password',
 	placeholder: 'Enter your password...',
-	styles: styles,
-	rules: [
+	styles: styles, // Optional
+	gsap: gsap, // Optional
+	rules: [ // Optional
 		{
 			type: 'required',
 			onFail: function() {
@@ -173,10 +178,13 @@ function init() {
 		},
 	});
 
+	gsap.registerPlugin(PixiPlugin);
+
 	var email = new PIXI.form.TextInput({
     type: 'text',
     placeholder: 'Enter your email...',
 		styles: styles,
+		gsap: gsap,
 		rules: [
 			{
 				type: 'required',
@@ -197,6 +205,7 @@ function init() {
     type: 'password',
     placeholder: 'Enter your password...',
 		styles: styles,
+		gsap: gsap,
 		rules: [
 			{
 				type: 'required',

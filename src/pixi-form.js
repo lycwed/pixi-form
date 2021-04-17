@@ -30,6 +30,7 @@ export class TextInput extends PIXI.Container {
 			},
 			options.styles || new TextInputStyles({})
 		);
+		this._gsap = options.gsap;
 
 		this._box_generator = new BoxGenerator({
 			error: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: 0xFF0000, width: this._styles.border.width } },
@@ -466,6 +467,7 @@ export class TextInput extends PIXI.Container {
 			fill: 0x333333,
 			width: 2,
 			height: this._font_metrics.fontSize,
+			gsap: this._gsap,
 		});
 
 		this._caret.visible = false;
@@ -897,8 +899,21 @@ class Caret extends PIXI.Graphics {
 		this.endFill();
 		this.closePath();
 
-		gsap.registerPlugin(PixiPlugin);
-		gsap.to(this, { alpha: 0, duration: 0.4, loop: true, ease: "power1.inOut", repeat: -1, yoyo: true });
+		if (options.gsap) {
+			options.gsap.to(this, { alpha: 0, duration: 0.4, loop: true, ease: "power1.inOut", repeat: -1, yoyo: true });
+		} else {
+			this._animateCaret();
+		}
+	}
+
+	_animateCaret() {
+		this.alpha = 0.8;
+		setTimeout(() => {
+			this.alpha = 0;
+			setTimeout(() => {
+				this._animateCaret();
+			}, 400);
+		}, 400);
 	}
 }
 
