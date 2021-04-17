@@ -5,12 +5,19 @@ declare namespace PIXI {
     export type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
     export type TextInputRule = {
-      onFail: () => void;
       type?: string;
       validate?: (value: any) => boolean;
+      onFail: () => void;
     };
 
     export type TextInputOptions = {
+      type: string;
+      placeholder: string;
+      rules: TextInputRule[];
+      styles: TextInputStyles;
+    };
+
+    export class TextInputStyles {
       width: number;
       color?: number;
       padding?: number;
@@ -20,9 +27,9 @@ declare namespace PIXI {
       position?: string;
       backgroundColor?: number;
       border?: {
-        color: number;
-        width: number;
-        radius: number;
+        color?: number;
+        width?: number;
+        radius?: number;
       };
       outline?: string;
       lineHeight?: string;
@@ -33,15 +40,17 @@ declare namespace PIXI {
       _type: string;
       _placeholder: string;
       _rules: TextInputRule[];
-      _styles: TextInputOptions;
+      _styles: TextInputStyles;
+      _placeholderColor: number;
       _box_generator: any;
       _box_cache: object;
       _previous: object;
       _dom_added: boolean;
       _dom_visible: boolean;
       _dom_input: object;
-      _placeholder: string;
-      _placeholderColor: number;
+      _pixi_field: PIXI.Text;
+      _pixi_field_mask: PIXI.Graphics;
+      _pixi_field_hitbox: PIXI.Graphics;
       _selection: number[];
       _restrict_value: string;
       _restrict_regex: RegExp;
@@ -83,6 +92,8 @@ declare namespace PIXI {
       destroy(): void;
 
       protected _createDOMInput(): void;
+
+      protected _updateDOMStyle(): void;
 
       protected _addListeners(): void;
 
@@ -126,25 +137,25 @@ declare namespace PIXI {
 
       _needsNewBoxCache(): boolean;
 
-      _createSurrogate(): void;
+      _createPIXIField(): void;
 
-      _updateSurrogate(): void;
+      _updatePIXIField(): void;
 
-      _updateSurrogateHitbox(bounds: PIXI.Bounds): void;
+      _updatePIXIFieldHitbox(bounds: PIXI.Bounds): void;
 
-      _updateSurrogateMask(bounds: PIXI.Bounds, paddings: number[]): void;
+      _updatePIXIFieldMask(bounds: PIXI.Bounds, paddings: number[]): void;
 
-      _destroySurrogate(): void;
+      _destroyPIXIField(): void;
 
-      _onSurrogateFocus(): void;
+      _onPIXIFieldFocus(): void;
 
       _ensureFocus(): void;
 
-      _deriveSurrogateStyle(): PIXI.TextStyle;
+      _derivePIXIFieldStyle(): PIXI.TextStyle;
 
-      _deriveSurrogatePadding(): number[];
+      _derivePIXIFieldPadding(): number[];
 
-      _deriveSurrogateText(): string;
+      _derivePIXIFieldText(): string;
 
       _updateFontMetrics(): void;
 

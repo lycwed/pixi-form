@@ -15,6 +15,7 @@ export class TextInputStyles {
 export class TextInput extends PIXI.Container {
 	constructor(options) {
 		super();
+
 		this._type = options.type || 'text';
 		this._placeholder = options.placeholder;
 		this._rules = options.rules || [];
