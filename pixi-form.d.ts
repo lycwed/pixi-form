@@ -22,10 +22,9 @@ declare namespace PIXI {
       color?: number;
       padding?: number;
       fontSize?: number;
-      fontFamily?: number;
+      fontFamily?: string;
       backgroundColor?: number;
       position?: string;
-      backgroundColor?: number;
       border?: {
         color?: number;
         width?: number;
