@@ -1,11 +1,16 @@
 
-# PIXI.TextInput - Plugin for pixi.js
+# PIXI.form - Plugin for pixi.js
 
 This plugin is based on mwni.io TextInput PIXI plugin.
 
+Includes now :
+
+`PIXI.form.TextInput` to generate input
+`PIXI.form.TextInputStyles` to generate styles for input
+
 I introduce:
 
-- the input type password  
+- the input type password
 - the notion of rules to validate an input and the box colorization on blur.
 - d.ts file.
 
@@ -34,15 +39,13 @@ import 'pixi-form';
 
 var width = 1000;
 var height = 600;
-var app = new PIXI.Application(
-    { 
-        width: width,
-        height: height,
-        antialias: true,
-        backgroundColor: 0xffffff,
-        resolution: window.devicePixelRatio || 1
-    }
-);
+var app = new PIXI.Application({ 
+    width: width,
+    height: height,
+    antialias: true,
+    backgroundColor: 0xffffff,
+    resolution: window.devicePixelRatio || 1
+});
 
 document.getElementById('canvas-placeholder').appendChild(app.view)
 
@@ -60,11 +63,15 @@ var styles = new PIXI.form.TextInputStyles({
     },
 });
 
+// Optional
+gsap.registerPlugin(PixiPlugin);
+
 var email = new PIXI.form.TextInput({
-type: 'text',
-placeholder: 'Enter your email...',
-    styles: styles,
-    rules: [
+    type: 'text',
+    placeholder: 'Enter your email...',
+    styles: styles, // Optional
+    gsap: gsap, // Optional
+    rules: [ // Optional
         {
             type: 'required',
             onFail: function() {
@@ -81,10 +88,11 @@ placeholder: 'Enter your email...',
 });
 
 var password = new PIXI.form.TextInput({
-type: 'password',
-placeholder: 'Enter your password...',
-    styles: styles,
-    rules: [
+    type: 'password',
+    placeholder: 'Enter your password...',
+    styles: styles, // Optional
+    gsap: gsap, // Optional
+    rules: [ // Optional
         {
             type: 'required',
             onFail: function() {
@@ -117,8 +125,6 @@ password.x = width / 2;
 password.y = email.y + email.height + 20;
 password.pivot.x = password.width / 2;
 password.pivot.y = password.height / 2;
-
-console.log(email, password);
 
 app.stage.addChild(email, password);
 ```
