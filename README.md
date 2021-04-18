@@ -3,10 +3,18 @@
 
 This plugin is based on mwni.io TextInput PIXI plugin.
 
+# Installation
+
+Created with PIXI v5.3.9.
+
+`npm i -S pixi-form`
+
+# What's new !?
+
 Includes now :
 
-`PIXI.form.TextInput` to generate input
-`PIXI.form.TextInputStyles` to generate styles for input
+- `PIXI.form.TextInput` to generate input
+- `PIXI.form.TextInputStyles` to generate styles for input
 
 I introduce:
 
@@ -24,22 +32,20 @@ Some validation rules are already integrated:
 
 And if it's not enough you can set your own validator!
 
-# Installing
-
-Created with PIXI v5.3.9.
-
-`npm i -S pixi-form`
-
 # Usage
 
 ```ts
 import * as PIXI from 'pixi.js';
-import gsap from 'gsap';
+import gsap from 'gsap'; // Optional
+import PixiPlugin from 'gsap/PixiPlugin'; // Optional
 import 'pixi-form';
 
-var width = 1000;
-var height = 600;
-var app = new PIXI.Application({ 
+// Optional
+gsap.registerPlugin(PixiPlugin);
+
+const width = 1000;
+const height = 600;
+const app = new PIXI.Application({ 
     width: width,
     height: height,
     antialias: true,
@@ -49,7 +55,7 @@ var app = new PIXI.Application({
 
 document.getElementById('canvas-placeholder').appendChild(app.view)
 
-var styles = new PIXI.form.TextInputStyles({
+const styles = new PIXI.form.TextInputStyles({
     fontFamily: 'Arial',
     fontSize: 36,
     padding: 12,
@@ -63,10 +69,7 @@ var styles = new PIXI.form.TextInputStyles({
     },
 });
 
-// Optional
-gsap.registerPlugin(PixiPlugin);
-
-var email = new PIXI.form.TextInput({
+const email = new PIXI.form.TextInput({
     type: 'text',
     placeholder: 'Enter your email...',
     styles: styles, // Optional
@@ -87,7 +90,7 @@ var email = new PIXI.form.TextInput({
     ]
 });
 
-var password = new PIXI.form.TextInput({
+const password = new PIXI.form.TextInput({
     type: 'password',
     placeholder: 'Enter your password...',
     styles: styles, // Optional
