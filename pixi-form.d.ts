@@ -16,7 +16,7 @@ declare namespace PIXI {
       placeholder: string;
       rules?: TextInputRule[];
       styles?: TextInputStyles;
-      gsap?: gsap;
+      gsap?: gsap.core.Tween;
     };
 
     export class TextInputStylesOptions {
@@ -32,7 +32,7 @@ declare namespace PIXI {
         width?: number;
         radius?: number;
       };
-    };
+    }
 
     export class TextInputStyles {
       width: number;
