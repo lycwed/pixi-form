@@ -16,7 +16,7 @@ declare namespace PIXI {
       placeholder: string;
       rules?: TextInputRule[];
       styles?: TextInputStyles;
-      gsap?: gsap.core.Tween;
+      gsap?: typeof gsap;
     };
 
     export class TextInputStylesOptions {
