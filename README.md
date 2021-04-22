@@ -171,7 +171,7 @@ form.y = 100;
 form.addInput(email);
 form.addInput(password);
 form.setSubmitButton(button);
-form.on('submit', (data) => {
+form.onEvent('submit', (data) => {
     console.log('submit data', data);
     alert(`Wow! ${data.email} ${data.password}`)
 });

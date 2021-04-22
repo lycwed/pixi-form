@@ -59,7 +59,7 @@ declare namespace PIXI {
       constructor(options: FormOptions);
 
       addInput(input: PIXI.form.TextInput): void;
-      on(event: string, callback: () => void): void;
+      onEvent(event: string, callback: () => void): void;
       setSubmitButton(button: PIXI.DisplayObject): void;
 
       _disableSubmit(): void;
@@ -145,7 +145,7 @@ declare namespace PIXI {
 
       setInputStyle(n: string, v: any): void;
 
-      destroy(options): void;
+      destroy(): void;
 
       addEventOn(name: string, callback: () => void): void;
 

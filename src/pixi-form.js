@@ -26,7 +26,7 @@ export class Form extends PIXI.Container {
 		this.addChild(this._backdrop);
 	}
 
-	on(event, callback) {
+	onEvent(event, callback) {
 		this._events[event] = callback;
 	}
 
