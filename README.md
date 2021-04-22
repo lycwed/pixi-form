@@ -14,15 +14,17 @@ Created with PIXI v5.3.9.
 Includes now :
 
 - `PIXI.form.TextInput` to generate input
-- `PIXI.form.TextInputStyles` to generate styles for input
+- `PIXI.form.TextInputStyles` to generate input styles
+- `PIXI.form.Form` to generate form to wrap inputs
 
 I introduce:
 
 - the input type password
 - the notion of rules to validate an input and the box colorization on blur.
+- the formulary allows you to validate submit according to the input validation.
 - d.ts file.
 
-Some validation rules are already integrated:
+Some input validation rules are already integrated:
 
 - required
 - email
@@ -39,9 +41,6 @@ import * as PIXI from 'pixi.js';
 import gsap from 'gsap'; // Optional
 import PixiPlugin from 'gsap/PixiPlugin'; // Optional
 import 'pixi-form';
-
-// Optional
-gsap.registerPlugin(PixiPlugin);
 
 const width = 1000;
 const height = 600;
@@ -72,6 +71,7 @@ const styles = new PIXI.form.TextInputStyles({
     },
 });
 
+// Optional
 gsap.registerPlugin(PixiPlugin);
 
 const email = new PIXI.form.TextInput({

@@ -133,8 +133,8 @@ var password = new PIXI.form.TextInput({
 
 // All here is optional, you can use
 var button = new PIXI.Graphics();
-button.lineStyle(1, 0x75F94C, 1, 0);
-button.beginFill(0x6FD254);
+button.lineStyle(1, 0x00FF00, 1, 0);
+button.beginFill(0x00AA00);
 button.drawRoundedRect(0, 0, 530, 70, 12);
 button.endFill();
 button.on('pointerover', () => {
@@ -276,9 +276,9 @@ function init() {
 
 	// All here is optional, you can use
 	var button = new PIXI.Graphics();
-	button.lineStyle(1, 0x75F94C, 1, 0);
-	button.beginFill(0x6FD254);
-	button.drawRoundedRect(0, 0, 530, 70, 12);
+	button.lineStyle(4, 0x00FF00, 1, 0);
+	button.beginFill(0x00AA00);
+	button.drawRoundedRect(0, 0, 530, 72, 12);
 	button.endFill();
 	button.on('pointerover', () => {
 		button.scale.set(1.1);

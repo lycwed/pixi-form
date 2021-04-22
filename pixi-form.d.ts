@@ -22,9 +22,25 @@ declare namespace PIXI {
     export type FormOptions = {
       width: number;
       height: number;
-      padding: number;
-      alignItems: string;
-      spaceBetween: number;
+      _padding?: number;
+      _alignItems?: string;
+      _spaceBetween?: number;
+    };
+
+    export type TextInputStylesOptions = {
+      width: number;
+      color?: number;
+      padding?: number;
+      fontSize?: number;
+      fontFamily?: string;
+      selectionColor?: string;
+      backgroundColor?: number;
+      position?: string;
+      border?: {
+        color?: number;
+        width?: number;
+        radius?: number;
+      };
     };
 
     export class Form extends PIXI.Container {
@@ -53,38 +69,23 @@ declare namespace PIXI {
       get data(): any;
     }
 
-    export class TextInputStylesOptions {
-      width: number;
-      color?: number;
-      padding?: number;
-      fontSize?: number;
-      fontFamily?: string;
-      backgroundColor?: number;
-      position?: string;
-      border?: {
-        color?: number;
-        width?: number;
-        radius?: number;
-      };
-      constructor(options?: TextInputStyles);
-    }
-
     export class TextInputStyles {
       width: number;
-      color?: number;
-      padding?: number;
-      fontSize?: number;
-      fontFamily?: string;
-      backgroundColor?: number;
-      position?: string;
-      border?: {
-        color?: number;
-        width?: number;
-        radius?: number;
+      color: number;
+      padding: number;
+      fontSize: number;
+      fontFamily: string;
+      selectionColor: number;
+      backgroundColor: number;
+      position: string;
+      border: {
+        color: number;
+        width: number;
+        radius: number;
       };
-      outline?: string;
-      lineHeight?: string;
-      multiline?: boolean;
+      outline: string;
+      lineHeight: string;
+      multiline: boolean;
 
       constructor(options?: TextInputStylesOptions);
     }

@@ -53,6 +53,10 @@ export class Form extends PIXI.Container {
 			this._backdrop.interactive = true;
 		});
 
+		input.addEventOn("inputchange", () => {
+			this._updateSubmit();
+		});
+
 		input.addEventOn("statechange", () => {
 			this._updateSubmit();
 		});
@@ -118,6 +122,7 @@ export class TextInputStyles {
 		this.padding = styles.padding || 4;
 		this.fontSize = styles.fontSize || 13;
 		this.fontFamily = styles.fontFamily || 'Arial';
+		this.selectionColor = styles.selectionColor || 0x00AAFF;
 		this.backgroundColor = styles.backgroundColor || 0xEFEFEF;
 		this.border = {
 			...{ color: 0xFFFFFF, width: 0, radius: 0 }, ...styles.border
@@ -128,7 +133,6 @@ export class TextInputStyles {
 export class TextInput extends PIXI.Container {
 	constructor(options) {
 		super();
-
 		this.name = options.name;
 		this.value = options.value || '';
 		this._type = options.type || 'text';
@@ -162,6 +166,7 @@ export class TextInput extends PIXI.Container {
 			this._multiline = false;
 		}
 
+		this.isValid = !this._rules.length;
 		this._eventsCallback = {};
 		this._box_cache = {};
 		this._previous = {};
@@ -192,6 +197,7 @@ export class TextInput extends PIXI.Container {
 
 		if (substitute) {
 			this._createPIXIField();
+			this._createCaret();
 			this._dom_visible = false;
 		} else {
 			this._destroyPIXIField();
@@ -272,10 +278,6 @@ export class TextInput extends PIXI.Container {
 
 	get htmlInput() {
 		return this._dom_input;
-	}
-
-	get isValid() {
-		return this.state === 'VALID';
 	}
 
 	focus() {
@@ -397,12 +399,10 @@ export class TextInput extends PIXI.Container {
 	}
 
 	_onInputInput(e) {
+		this._checkRules(true);
+
 		if (this._restrict_regex) {
 			this._applyRestriction();
-		}
-
-		if (this._substituted) {
-			this._updateSubstitution();
 		}
 
 		this._updateCaret();
@@ -421,7 +421,7 @@ export class TextInput extends PIXI.Container {
 	}
 
 	_onBlurred() {
-		const state = this._checkRules();
+		const state = this._checkRules(false);
 		this._setState(state);
 		this.emit('blur');
 	}
@@ -441,15 +441,15 @@ export class TextInput extends PIXI.Container {
 
 	_setState(state) {
 		this.state = state;
-		this._callEventOn('statechange', state);
 		this._updateBox();
+
 		if (this._substituted) {
 			this._updateSubstitution();
 		}
 	}
 
 	// Allows to check email, number, string and min length
-	_checkRules() {
+	_checkRules(isSilent) {
 		const emailRegexp = /^([a-z0-9-_]+){2}@([a-z0-9-_]+){2}\.([a-z]+){2}$/;
 		const numberRegexp = /^\d+$/;
 		const stringRegexp = /^(?:.*[A-Za-z])$/;
@@ -507,12 +507,15 @@ export class TextInput extends PIXI.Container {
 			}
 
 			if (state === 'ERROR') {
-				if (rule.onFail) {
+				if (rule.onFail && !isSilent) {
 					rule.onFail();
 				}
 				break;
 			}
 		}
+
+		this.isValid = state === 'VALID';
+		this._callEventOn('statechange', this.isValid);
 
 		return state;
 	}
@@ -548,7 +551,7 @@ export class TextInput extends PIXI.Container {
 
 	_update() {
 		this._updateDOMInput();
-		this._createCaret();
+		this._updateCaret();
 		if (this._substituted) {
 			this._updatePIXIField();
 		}
@@ -575,8 +578,8 @@ export class TextInput extends PIXI.Container {
 			let caretX = this._styles.padding;
 			this._scrollDiff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
 
-			if (this._dom_copy.childNodes.length && this._dom_input.selectionEnd) {
-				this._caretSpan = this._dom_copy.childNodes[this._dom_input.selectionEnd - 1];
+			if (this._dom_copy.childNodes.length && this._dom_input.selectionStart) {
+				this._caretSpan = this._dom_copy.childNodes[this._dom_input.selectionStart - 1];
 				this._spanDiff = this._dom_copy.offsetWidth - (this._caretSpan.offsetLeft + this._caretSpan.offsetWidth);
 				// console.log('diff / spanDiff', this._dom_copy.offsetWidth, this._scrollDiff, this._spanDiff);
 
@@ -594,28 +597,56 @@ export class TextInput extends PIXI.Container {
 
 			this._caret.x = caretX;
 			this._caret.y = this._styles.padding;
-			this._caret.height = this._font_metrics.fontSize + 4;
+
+			this._updateSelectionBox();
 			this._updatePIXIField();
 		}, 50);
 	}
 
-	_updateCaretPosition(x) {
+	_updateSelectionBox() {
+		const children = Array.prototype.slice.call(this._dom_copy.childNodes);
+		this._selectionBox.y = this._caret.y;
+
+		if (this._dom_input.selectionStart !== this._dom_input.selectionEnd) {
+			const spans = children.slice(this._dom_input.selectionStart, this._dom_input.selectionEnd);
+			const width = spans.map((span) => span.offsetWidth).reduce((acc, val) => acc + val);
+			this._selectionBox.width = width;
+			this._selectionBox.x = this._caret.x;
+			this._selectionBox.alpha = 0.4;
+			this._caret.visible = false;
+
+		} else {
+			this._selectionBox.width = 1;
+			this._selectionBox.alpha = 0;
+
+			if (this.state === 'FOCUSED') {
+				this._caret.visible = true;
+			}
+		}
+	}
+
+	_createSelectionBox(height) {
+		this._selectionBox = new PIXI.Graphics();
+		this._selectionBox.beginFill(this._styles.selectionColor);
+		this._selectionBox.drawRect(0, 0, 1, height);
+		this._selectionBox.endFill();
+		this._selectionBox.closePath();
+		this._selectionBox.alpha = 0;
+		this._selectionBox.mask = this._pixi_field_mask;
+
+		this.addChild(this._selectionBox);
 	}
 
 	_createCaret() {
-		if (this._caret) {
-			this._updateCaret();
-			return;
-		}
-
 		this._caret = new Caret({
 			fill: 0x333333,
 			width: 2,
-			height: this._font_metrics.fontSize,
+			height: this._font_metrics.fontSize + 4,
 			gsap: this._gsap,
 		});
 
 		this._caret.visible = false;
+		this._createSelectionBox(this._caret.height);
 
 		this.addChild(this._caret);
 	}
@@ -657,19 +688,15 @@ export class TextInput extends PIXI.Container {
 	_updateSubstitution() {
 		if (this.state === 'FOCUSED') {
 			this._dom_visible = true;
-			// this._pixi_field.visible = false;
 			if (this._caret) {
 				this._caret.visible = true;
 			}
 		} else {
-			// this._dom_visible = false;
-			// this._pixi_field.visible = true;
 			if (this._caret) {
 				this._caret.visible = false;
 			}
 		}
-		// this._dom_visible = true;
-		// this._pixi_field.visible = true;
+
 		this._updateDOMInput();
 		this._updatePIXIField();
 	}
