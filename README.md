@@ -38,9 +38,12 @@ And if it's not enough you can set your own validator!
 
 ```ts
 import * as PIXI from 'pixi.js';
-import gsap from 'gsap'; // Optional
-import PixiPlugin from 'gsap/PixiPlugin'; // Optional
 import 'pixi-form';
+
+// Optional
+import gsap from 'gsap';
+import PixiPlugin from 'gsap/PixiPlugin';
+gsap.registerPlugin(PixiPlugin);
 
 const width = 1000;
 const height = 600;
@@ -54,7 +57,7 @@ const app = new PIXI.Application(
     }
 );
 
-document.getElementById('canvas-placeholder').appendChild(app.view);
+document.querySelector('#canvas-wrapper').appendChild(app.view);
 
 const styles = new PIXI.form.TextInputStyles({
     fontFamily: 'impact',
@@ -62,6 +65,7 @@ const styles = new PIXI.form.TextInputStyles({
     padding: 12,
     width: 500,
     color: 0x333333,
+    selectionColor: 0x00AAFF,
     backgroundColor: 0xEFEFEF,
     border: {
         position: 'bottom',
@@ -70,9 +74,6 @@ const styles = new PIXI.form.TextInputStyles({
         color: 0xDFDFDF,
     },
 });
-
-// Optional
-gsap.registerPlugin(PixiPlugin);
 
 const email = new PIXI.form.TextInput({
 type: 'text',
@@ -140,10 +141,10 @@ button.on('pointerout', () => {
 });
 
 const buttonStyles = new PIXI.TextStyle({
-    fontFamily : 'impact',
+    fontFamily: 'impact',
     fontSize: 36,
-    fill : 0xffffff,
-    align : 'center',
+    fill: 0xffffff,
+    align: 'center',
     dropShadow: true,
     dropShadowColor: 0x75F94C,
     dropShadowBlur: 20,

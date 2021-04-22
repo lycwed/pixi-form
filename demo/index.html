@@ -11,11 +11,12 @@
 </head>
 
 <body onload="init()">
-	<div id="canvas-placeholder"></div>
+	<div id="canvas-wrapper"></div>
 	<div class="controls">
 		<div>
 			<label>Font</label>
 			<select id="font">
+				<option value="Impact">Impact</option>
 				<option value="Arial">Arial</option>
 				<option value="Helvetica">Helvetica</option>
 				<option value="Times New Roman">Times New Roman</option>
@@ -37,17 +38,24 @@
 		<div>
 			<input type="button" value="Disable" id="disable"/>
 		</div>
-		<div>
+		<!-- <div>
 			<input type="button" value="Select" id="select"/>
 		</div>
 		<div>
 			<input type="button" value="Animate" id="animate"/>
-		</div>
+		</div> -->
 	</div>
 
 	<div class="source">
     <pre>
 			<code class="javascript">
+// imports in head
+// https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.9/pixi.min.js"
+// https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"
+// https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/PixiPlugin.min.js"
+
+gsap.registerPlugin(PixiPlugin);
+
 var width = 1000;
 var height = 600;
 var app = new PIXI.Application(
@@ -60,10 +68,10 @@ var app = new PIXI.Application(
 	}
 );
 
-document.getElementById('canvas-placeholder').appendChild(app.view);
+document.getElementById('canvas-wrapper').appendChild(app.view);
 
 var styles = new PIXI.form.TextInputStyles({
-	fontFamily: 'impact',
+	fontFamily: 'Impact',
 	fontSize: 36,
 	padding: 12,
 	width: 500,
@@ -76,8 +84,6 @@ var styles = new PIXI.form.TextInputStyles({
 		color: 0xDFDFDF,
 	},
 });
-
-gsap.registerPlugin(PixiPlugin);
 
 var email = new PIXI.form.TextInput({
 	type: 'text',
@@ -145,7 +151,7 @@ button.on('pointerout', () => {
 });
 
 var buttonStyles = new PIXI.TextStyle({
-	fontFamily : 'impact',
+	fontFamily : 'Impact',
 	fontSize: 36,
 	fill : 0xffffff,
 	align : 'center',
@@ -188,7 +194,11 @@ app.stage.addChild(form);
 
 <script type="text/javascript">
 
+gsap.registerPlugin(PixiPlugin);
+
 var app;
+var email;
+var password;
 
 function init() {
 	var width = 1000;
@@ -203,10 +213,10 @@ function init() {
 		}
 	);
 
-	document.getElementById('canvas-placeholder').appendChild(app.view);
+	document.getElementById('canvas-wrapper').appendChild(app.view);
 
 	var styles = new PIXI.form.TextInputStyles({
-		fontFamily: 'impact',
+		fontFamily: 'Impact',
 		fontSize: 36,
 		padding: 12,
 		width: 500,
@@ -220,9 +230,7 @@ function init() {
 		},
 	});
 
-	gsap.registerPlugin(PixiPlugin);
-
-	var email = new PIXI.form.TextInput({
+	email = new PIXI.form.TextInput({
     type: 'text',
     name: 'email',
     placeholder: 'Enter your email...',
@@ -244,7 +252,7 @@ function init() {
 		]
 	});
 
-	var password = new PIXI.form.TextInput({
+	password = new PIXI.form.TextInput({
     type: 'password',
     name: 'password',
     placeholder: 'Enter your password...',
@@ -288,10 +296,10 @@ function init() {
 	});
 
 	var buttonStyles = new PIXI.TextStyle({
-		fontFamily : 'impact',
+		fontFamily : 'Impact',
 		fontSize: 36,
-		fill : 0xffffff,
-		align : 'center',
+		fill: 0xffffff,
+		align: 'center',
 		dropShadow: true,
     dropShadowColor: 0x75F94C,
     dropShadowBlur: 20,
@@ -332,51 +340,56 @@ function init() {
 
 // DEMO CONTROLS
 
-var timer;
+// var timer;
 
-function setAnimation(on){
-	if (on) {
-		app.ticker.add(animateLoop)
-	} else {
-		app.ticker.remove(animateLoop)
-		timer = 0
-		animateLoop()
-	}
-}
+// function setAnimation(on){
+// 	if (on) {
+// 		app.ticker.add(animateLoop)
+// 	} else {
+// 		app.ticker.remove(animateLoop)
+// 		timer = 0
+// 		animateLoop()
+// 	}
+// }
 
-function animateLoop(){
-	input.rotation = timer/50
-	input.scale.x = 1+Math.sin(timer/25)*0.3
-	input.scale.y = 1+Math.sin(timer/32)*0.2
-	timer++
-}
+// function animateLoop(){
+// 	input.rotation = timer/50
+// 	input.scale.x = 1+Math.sin(timer/25)*0.3
+// 	input.scale.y = 1+Math.sin(timer/32)*0.2
+// 	timer++
+// }
 
 function setupDemoControls(){
 	document.getElementById('font').onchange = function(){
-		input.setInputStyle('fontFamily',this.value, true)
+		email.setInputStyle('fontFamily',this.value, true)
+		password.setInputStyle('fontFamily',this.value, true)
 	}
 	document.getElementById('size').onchange = function(){
-		input.setInputStyle('fontSize',this.value+'px', true)
+		email.setInputStyle('fontSize',this.value+'px', true)
+		password.setInputStyle('fontSize',this.value+'px', true)
 	}
 	document.getElementById('bold').onchange = function(){
-		input.setInputStyle('fontWeight',this.checked ? 'bold' : 'normal', true)
+		email.setInputStyle('fontWeight',this.checked ? 'bold' : 'normal', true)
+		password.setInputStyle('fontWeight',this.checked ? 'bold' : 'normal', true)
 	}
 	document.getElementById('padding').onchange = function(){
-		input.setInputStyle('padding',this.value+'px', true)
+		email.setInputStyle('padding',this.value+'px', true)
+		password.setInputStyle('padding',this.value+'px', true)
 	}
 	document.getElementById('disable').onclick = function(){
 		this._toggle = !this._toggle
-		input.disabled = this._toggle
+		email.disabled = this._toggle
+		password.disabled = this._toggle
 		this.value = this._toggle ? 'Enable' : 'Disable'
 	}
-	document.getElementById('select').onclick = function(){
-		input.select()
-	}
-	document.getElementById('animate').onclick = function(){
-		this._toggle = !this._toggle
-		setAnimation(this._toggle)
-		this.value = this._toggle ? 'Ok, enough' : 'Animate'
-	}
+	// document.getElementById('select').onclick = function(){
+	// 	input.select()
+	// }
+	// document.getElementById('animate').onclick = function(){
+	// 	this._toggle = !this._toggle
+	// 	setAnimation(this._toggle)
+	// 	this.value = this._toggle ? 'Ok, enough' : 'Animate'
+	// }
 }
 
 hljs.configure({tabReplace: '    '})
