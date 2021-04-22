@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lycwed/text-input-plus.git"
+    "url": "git+https://github.com/lycwed/pixi-form.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lycwed/text-input-plus/issues"
+    "url": "https://github.com/lycwed/pixi-form/issues"
   },
-  "homepage": "https://github.com/lycwed/text-input-plus#readme",
+  "homepage": "https://github.com/lycwed/pixi-form#readme",
   "dependencies": {
     "gsap": "^3.6.1",
     "pixi.js": "^5.3.9"

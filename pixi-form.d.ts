@@ -19,6 +19,40 @@ declare namespace PIXI {
       gsap?: typeof gsap;
     };
 
+    export type FormOptions = {
+      width: number;
+      height: number;
+      padding: number;
+      alignItems: string;
+      spaceBetween: number;
+    };
+
+    export class Form extends PIXI.Container {
+      width: number;
+      height: number;
+      _padding: number;
+      _alignItems: string;
+      _spaceBetween: number;
+      _inputs: TextInput[];
+      _backdrop: PIXI.Graphics;
+      _submitButton: PIXI.DisplayObject;
+      _events: {
+        [name: string]: () => void;
+      };
+
+      constructor(options: FormOptions);
+
+      addInput(input: PIXI.form.TextInput): void;
+      on(event: string, callback: () => void): void;
+      setSubmitButton(button: PIXI.DisplayObject): void;
+
+      _disableSubmit(): void;
+      _enableSubmit(): void;
+      _updateSubmit(): void;
+
+      get data(): any;
+    }
+
     export class TextInputStylesOptions {
       width: number;
       color?: number;
@@ -32,6 +66,7 @@ declare namespace PIXI {
         width?: number;
         radius?: number;
       };
+      constructor(options?: TextInputStyles);
     }
 
     export class TextInputStyles {
@@ -99,6 +134,8 @@ declare namespace PIXI {
       get text(): string;
       set text(text: string);
 
+      get isValid(): boolean;
+
       focus(): void;
 
       blur(): void;
@@ -107,7 +144,11 @@ declare namespace PIXI {
 
       setInputStyle(n: string, v: any): void;
 
-      destroy(): void;
+      destroy(options): void;
+
+      addEventOn(name: string, callback: () => void): void;
+
+      _callEventOn(name: string, data: any): void;
 
       protected _createDOMInput(): void;
 

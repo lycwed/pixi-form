@@ -1,3 +1,116 @@
+export class Form extends PIXI.Container {
+	constructor(options) {
+		super();
+
+		this.width = options.width;
+		this.height = options.height;
+		this._padding = options.padding || 10;
+		this._alignItems = options.alignItems || 'left';
+		this._spaceBetween = options.spaceBetween || 4;
+
+		this._submitButton = null;
+		this._inputs = [];
+		this._events = {};
+
+		this._backdrop = new PIXI.Graphics();
+		this._backdrop.beginFill(0xFFFFFF);
+		this._backdrop.drawRect(0, 0, options.width, options.height);
+		this._backdrop.endFill();
+		this._backdrop.on("pointerdown", () => {
+			this._inputs.forEach((input) => {
+				input.blur();
+				this._backdrop.interactive = false;
+			});
+		});
+
+		this.addChild(this._backdrop);
+	}
+
+	on(event, callback) {
+		this._events[event] = callback;
+	}
+
+	addInput(input) {
+		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
+		input.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+
+		switch (this._alignItems) {
+			case 'center':
+				input.x = this.width / 2;
+				input.pivot.x = input.width / 2;
+				input.pivot.y = 0;
+				break;
+
+			case 'left':
+				input.x = this._padding;
+				break;
+		}
+
+		this._inputs.push(input);
+		this.addChild(input);
+
+		input.addEventOn("pointerdown", () => {
+			this._backdrop.interactive = true;
+		});
+
+		input.addEventOn("statechange", () => {
+			this._updateSubmit();
+		});
+	}
+
+	_disableSubmit() {
+		if (this._submitButton) {
+			this._submitButton.alpha = 0.6;
+			this._submitButton.interactive = false;
+		}
+	}
+
+	_enableSubmit() {
+		if (this._submitButton) {
+			this._submitButton.alpha = 1;
+			this._submitButton.interactive = true;
+		}
+	}
+
+	_updateSubmit() {
+		let isValidForm = true;
+		this._inputs.forEach((input) => {
+			if (!input.isValid) {
+				isValidForm = false;
+			}
+		});
+		if (isValidForm) {
+			this._enableSubmit();
+		} else {
+			this._disableSubmit();
+		}
+	}
+
+	get data() {
+		const data = {};
+		this._inputs.forEach((input) => {
+			data[input.name] = input.value;
+		});
+		return data;
+	}
+
+	setSubmitButton(button) {
+		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
+		button.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+		button.x = this.width / 2;
+		button.pivot.x = button.width / 2;
+		button.pivot.y = 0;
+		button.on('pointerdown', () => {
+			if (this._events.submit) {
+				this._events.submit(this.data);
+			}
+		})
+		this._submitButton = button;
+		this._disableSubmit();
+		this.addChild(button);
+	}
+}
+
 export class TextInputStyles {
 	constructor(styles) {
 		this.width = styles.width || 200;
@@ -16,6 +129,8 @@ export class TextInput extends PIXI.Container {
 	constructor(options) {
 		super();
 
+		this.name = options.name;
+		this.value = options.value || '';
 		this._type = options.type || 'text';
 		this._placeholder = options.placeholder;
 		this._rules = options.rules || [];
@@ -25,7 +140,7 @@ export class TextInput extends PIXI.Container {
 				backgroundColor: 0xFFFFFF,
 				transformOrigin: '0 0',
 				outline: 'none',
-				border: 'none',
+				border: null,
 				lineHeight: '1',
 			},
 			options.styles || new TextInputStyles({})
@@ -33,11 +148,11 @@ export class TextInput extends PIXI.Container {
 		this._gsap = options.gsap;
 
 		this._box_generator = new BoxGenerator({
-			error: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: 0xFF0000, width: this._styles.border.width } },
-			valid: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: 0x00FF00, width: this._styles.border.width } },
-			default: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: this._styles.border.color, width: this._styles.border.width } },
-			focused: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius, stroke: { color: this._styles.border.color, width: this._styles.border.width } },
-			disabled: { fill: this._styles.backgroundColor, rounded: this._styles.border.radius }
+			default: { color: this._styles.backgroundColor, border: this._styles.border },
+			focused: { color: this._styles.backgroundColor, border: this._styles.border },
+			disabled: { color: this._styles.backgroundColor, border: this._styles.border },
+			error: { color: this._styles.backgroundColor, border: { ...this._styles.border, ...{ color: 0xFF0000 } } },
+			valid: { color: this._styles.backgroundColor, border: { ...this._styles.border, ...{ color: 0x00FF00 } } },
 		});
 
 		if (this._styles.hasOwnProperty('multiline')) {
@@ -47,6 +162,7 @@ export class TextInput extends PIXI.Container {
 			this._multiline = false;
 		}
 
+		this._eventsCallback = {};
 		this._box_cache = {};
 		this._previous = {};
 		this._dom_added = false;
@@ -158,6 +274,10 @@ export class TextInput extends PIXI.Container {
 		return this._dom_input;
 	}
 
+	get isValid() {
+		return this.state === 'VALID';
+	}
+
 	focus() {
 		if (this._substituted && !this.dom_visible) {
 			this._setDOMInputVisible(true);
@@ -203,6 +323,22 @@ export class TextInput extends PIXI.Container {
 	destroy(options) {
 		this._destroyBoxCache();
 		super.destroy(options);
+	}
+
+	addEventOn(name, callback) {
+		if (!this._eventsCallback[name]) {
+			this._eventsCallback[name] = [];
+		}
+
+		this._eventsCallback[name].push(callback);
+	}
+
+	_callEventOn(name, data) {
+		if (this._eventsCallback[name]) {
+			this._eventsCallback[name].forEach((callback) => {
+				callback(data || null);
+			});
+		}
 	}
 
 
@@ -271,6 +407,7 @@ export class TextInput extends PIXI.Container {
 
 		this._updateCaret();
 		this._updateDOMCopy();
+		this.value = this.text;
 		this.emit('input', this.text);
 	}
 
@@ -304,6 +441,7 @@ export class TextInput extends PIXI.Container {
 
 	_setState(state) {
 		this.state = state;
+		this._callEventOn('statechange', state);
 		this._updateBox();
 		if (this._substituted) {
 			this._updateSubstitution();
@@ -435,16 +573,23 @@ export class TextInput extends PIXI.Container {
 	_updateCaret() {
 		setTimeout(() => {
 			let caretX = this._styles.padding;
+			this._scrollDiff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
 
 			if (this._dom_copy.childNodes.length && this._dom_input.selectionEnd) {
-				const lastSpan = this._dom_copy.childNodes[this._dom_input.selectionEnd - 1];
-				const diff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
+				this._caretSpan = this._dom_copy.childNodes[this._dom_input.selectionEnd - 1];
+				this._spanDiff = this._dom_copy.offsetWidth - (this._caretSpan.offsetLeft + this._caretSpan.offsetWidth);
+				// console.log('diff / spanDiff', this._dom_copy.offsetWidth, this._scrollDiff, this._spanDiff);
 
-				if (diff < 0) {
+				if (this._scrollDiff < 0 && this._scrollDiff === this._spanDiff) {
 					caretX = caretX + this._dom_copy.offsetWidth;
 				} else {
-					caretX = caretX + lastSpan.offsetLeft + lastSpan.offsetWidth;
+					caretX = caretX + this._caretSpan.offsetLeft + this._caretSpan.offsetWidth + this._scrollDiff;
+					if (caretX < this._styles.padding) {
+						caretX = this._styles.padding;
+					}
 				}
+			} else {
+				this._spanDiff = this._dom_copy.offsetWidth;
 			}
 
 			this._caret.x = caretX;
@@ -484,17 +629,28 @@ export class TextInput extends PIXI.Container {
 			this._buildBoxCache();
 		}
 
+		if (!this.state) {
+			return;
+		}
+
+		const [box] = this._box_cache[this.state];
+
 		if (this.state === this._previous.state
-			&& this._box === this._box_cache[this.state]) {
+			&& this._box === box) {
 			return;
 		}
 
 		if (this._box) {
 			this.removeChild(this._box);
 		}
+		if (this._boxShadow) {
+			this.removeChild(this._boxShadow);
+		}
 
-		this._box = this._box_cache[this.state];
-		this.addChildAt(this._box, 0);
+		[this._box, this._boxShadow] = this._box_cache[this.state];
+
+		this.addChildAt(this._boxShadow, 1);
+		this.addChildAt(this._box, 2);
 		this._previous.state = this.state;
 	}
 
@@ -620,10 +776,11 @@ export class TextInput extends PIXI.Container {
 		}
 
 		let diff = this._dom_copy.offsetWidth - this._dom_copy.scrollWidth;
-		if (diff < 0) {
-			// if (this._caret) {
-			// 	diff = this._caret.x - this._dom_copy.scrollWidth;
-			// }
+		if (diff < 0 && this._spanDiff !== this._dom_copy.offsetWidth) {
+			if (this._caret && (this._scrollDiff + this._dom_copy.offsetWidth) < this._spanDiff) {
+				diff += this._spanDiff - (this._scrollDiff + this._dom_copy.offsetWidth);
+			}
+			console.log('_scrollDiff', this._scrollDiff, this._spanDiff, diff);
 			this._pixi_field.x = fieldX + diff;
 		} else {
 			this._pixi_field.x = fieldX;
@@ -664,6 +821,7 @@ export class TextInput extends PIXI.Container {
 	}
 
 	_onPIXIFieldFocus() {
+		this._callEventOn('pointerdown');
 		this._setDOMInputVisible(true);
 		//sometimes the input is not being focused by the mouseclick
 		setTimeout(this._ensureFocus.bind(this), 10);
@@ -772,14 +930,14 @@ export class TextInput extends PIXI.Container {
 		let input_bounds = this._getDOMInputBounds();
 
 		for (let i in states) {
-			const box = this._box_generator(
+			const [box, boxShadow] = this._box_generator(
 				input_bounds.width,
 				input_bounds.height,
 				states[i]
 			);
 
 			if (box) {
-				this._box_cache[states[i]] = box;
+				this._box_cache[states[i]] = [box, boxShadow];
 			}
 		}
 
@@ -793,7 +951,7 @@ export class TextInput extends PIXI.Container {
 		}
 
 		for (let i in this._box_cache) {
-			this._box_cache[i].destroy();
+			this._box_cache[i].forEach((box) => box.destroy());
 			this._box_cache[i] = null;
 			delete this._box_cache[i];
 		}
@@ -931,30 +1089,46 @@ function BoxGenerator(options) {
 		let style = options[state.toLowerCase()];
 		if (style) {
 			let box = new PIXI.Graphics();
-
-			if (style.fill) {
-				box.beginFill(style.fill);
+			if (style.color) {
+				box.beginFill(style.color);
 			}
-
-			if (style.stroke) {
-				box.lineStyle(
-					style.stroke.width || 1,
-					style.stroke.color || 0,
-					style.stroke.alpha || 1,
-					1
-				);
-			}
-
-			if (style.rounded) {
-				box.drawRoundedRect(0, 0, w, h, style.rounded);
-			} else {
-				box.drawRect(0, 0, w, h);
-			}
-
+			box.drawRoundedRect(0, 0, w, h, style.border.radius);
 			box.endFill();
-			box.closePath();
 
-			return box;
+			let boxShadow = null;
+
+			if (style.border && style.border.width) {
+				boxShadow = new PIXI.Graphics();
+				let sx = 0;
+				let sy = 0;
+				let sw = w;
+				let sh = h;
+				switch (style.border.position) {
+					case 'all':
+						sx -= style.border.width;
+						sy -= style.border.width;
+						sw += style.border.width * 2;
+						sh += style.border.width * 2;
+						break;
+					case 'left':
+						sx -= style.border.width;
+						break;
+					case 'right':
+						sx += style.border.width;
+						break;
+					case 'top':
+						sy -= style.border.width;
+						break;
+					case 'bottom':
+					default:
+						sy += style.border.width;
+				}
+				boxShadow.beginFill(style.border.color);
+				boxShadow.drawRoundedRect(sx, sy, sw, sh, style.border.radius + style.border.width);
+				boxShadow.endFill();
+			}
+
+			return [box, boxShadow];
 		}
 	}
 }

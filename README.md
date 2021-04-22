@@ -45,36 +45,42 @@ gsap.registerPlugin(PixiPlugin);
 
 const width = 1000;
 const height = 600;
-const app = new PIXI.Application({ 
-    width: width,
-    height: height,
-    antialias: true,
-    backgroundColor: 0xffffff,
-    resolution: window.devicePixelRatio || 1
-});
+const app = new PIXI.Application(
+    { 
+        width: width,
+        height: height,
+        antialias: true,
+        backgroundColor: 0xffffff,
+        resolution: window.devicePixelRatio || 1
+    }
+);
 
-document.getElementById('canvas-placeholder').appendChild(app.view)
+document.getElementById('canvas-placeholder').appendChild(app.view);
 
 const styles = new PIXI.form.TextInputStyles({
-    fontFamily: 'Arial',
+    fontFamily: 'impact',
     fontSize: 36,
     padding: 12,
     width: 500,
     color: 0x333333,
     backgroundColor: 0xEFEFEF,
     border: {
-        radius: 4,
-        width: 2,
-        color: 0xACACAC,
+        position: 'bottom',
+        radius: 0,
+        width: 1,
+        color: 0xDFDFDF,
     },
 });
 
+gsap.registerPlugin(PixiPlugin);
+
 const email = new PIXI.form.TextInput({
-    type: 'text',
-    placeholder: 'Enter your email...',
-    styles: styles, // Optional
-    gsap: gsap, // Optional
-    rules: [ // Optional
+type: 'text',
+name: 'email',
+placeholder: 'Enter your email...',
+    styles: styles,
+    gsap: gsap,
+    rules: [
         {
             type: 'required',
             onFail: function() {
@@ -91,11 +97,12 @@ const email = new PIXI.form.TextInput({
 });
 
 const password = new PIXI.form.TextInput({
-    type: 'password',
-    placeholder: 'Enter your password...',
-    styles: styles, // Optional
-    gsap: gsap, // Optional
-    rules: [ // Optional
+type: 'password',
+name: 'password',
+placeholder: 'Enter your password...',
+    styles: styles,
+    gsap: gsap,
+    rules: [
         {
             type: 'required',
             onFail: function() {
@@ -119,15 +126,54 @@ const password = new PIXI.form.TextInput({
     ]
 });
 
-email.x = width / 2;
-email.y = height / 2;
-email.pivot.x = email.width / 2;
-email.pivot.y = email.height / 2;
+// All here is optional, you can use
+const button = new PIXI.Graphics();
+button.lineStyle(1, 0x75F94C, 1, 0);
+button.beginFill(0x6FD254);
+button.drawRoundedRect(0, 0, 530, 70, 12);
+button.endFill();
+button.on('pointerover', () => {
+    button.scale.set(1.1);
+});
+button.on('pointerout', () => {
+    button.scale.set(1);
+});
 
-password.x = width / 2;
-password.y = email.y + email.height + 20;
-password.pivot.x = password.width / 2;
-password.pivot.y = password.height / 2;
+const buttonStyles = new PIXI.TextStyle({
+    fontFamily : 'impact',
+    fontSize: 36,
+    fill : 0xffffff,
+    align : 'center',
+    dropShadow: true,
+    dropShadowColor: 0x75F94C,
+    dropShadowBlur: 20,
+    dropShadowAngle: 0,
+    dropShadowDistance: 0,
+});
 
-app.stage.addChild(email, password);
+const buttonText = new PIXI.Text('SUBMIT RIGHT NOW!', buttonStyles);
+buttonText.x = button.width / 2;
+buttonText.y = button.height / 2;
+buttonText.pivot.x = buttonText.width / 2;
+buttonText.pivot.y = buttonText.height / 2;
+button.addChild(buttonText);
+
+// You can use form to wrap inputs with all logic to submit form 
+const form = new PIXI.form.Form({
+    width: width,
+    height: height,
+    alignItems: 'center',
+    spaceBetween: 10,
+});
+
+form.y = 100;
+form.addInput(email);
+form.addInput(password);
+form.setSubmitButton(button);
+form.on('submit', (data) => {
+    console.log('submit data', data);
+    alert(`Wow! ${data.email} ${data.password}`)
+});
+
+app.stage.addChild(form);
 ```
