@@ -3,6 +3,7 @@ export class Form extends PIXI.Container {
 		super();
 
 		this.isForm = true;
+		this.id = options.id || 'form';
 		this.width = options.width;
 		this.height = options.height;
 		this._padding = options.padding || 10;
