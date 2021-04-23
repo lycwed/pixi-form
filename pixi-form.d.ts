@@ -62,7 +62,7 @@ declare namespace PIXI {
       styles?: ButtonStylesOptions;
     };
 
-    class Button extends PIXI.Graphics {
+    export class Button extends PIXI.Graphics {
 	    constructor(options: ButtonOptions);
     }
 
@@ -115,9 +115,12 @@ declare namespace PIXI {
     }
 
     export class Input extends PIXI.Container {
-      _type: string;
-      _placeholder: string;
-      _rules: InputRule[];
+      name: string;
+      type: string;
+      value: string;
+      placeholder: string;
+      rules: InputRule[];
+      
       _styles: InputStyles;
       _placeholderColor: number;
       _box_generator: any;

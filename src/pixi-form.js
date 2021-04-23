@@ -223,9 +223,9 @@ export class Input extends PIXI.Container {
 		this.isInput = true;
 		this.name = options.name;
 		this.value = options.value || '';
-		this._type = options.type || 'text';
-		this._placeholder = options.placeholder;
-		this._rules = options.rules || [];
+		this.type = options.type || 'text';
+		this.placeholder = options.placeholder;
+		this.rules = options.rules || [];
 		this._styles = Object.assign(
 			{
 				position: 'absolute',
@@ -253,13 +253,13 @@ export class Input extends PIXI.Container {
 			this._multiline = false;
 		}
 
-		this.isValid = !this._rules.length;
+		this.isValid = !this.rules.length;
 		this._eventsCallback = {};
 		this._box_cache = {};
 		this._previous = {};
 		this._dom_added = false;
 		this._dom_visible = true;
-		this._placeholderColor = 0xa9a9a9;
+		this.placeholderColor = 0xa9a9a9;
 		this._selection = [0, 0];
 		this._restrict_value = '';
 		this._createDOMInput();
@@ -291,16 +291,16 @@ export class Input extends PIXI.Container {
 			this._dom_visible = true;
 		}
 
-		this.placeholder = this._placeholder;
+		this.placeholder = this.placeholder;
 		this._update();
 	}
 
 	get placeholder() {
-		return this._placeholder;
+		return this.placeholder;
 	}
 
 	set placeholder(text) {
-		this._placeholder = text;
+		this.placeholder = text;
 		if (this._substituted) {
 			this._updatePIXIField();
 			this._dom_input.placeholder = '';
@@ -441,7 +441,7 @@ export class Input extends PIXI.Container {
 		} else {
 			this._dom_input = document.createElement('input');
 			this._dom_input.id = `input_${id}`;
-			this._dom_input.type = this._type;
+			this._dom_input.type = this.type;
 		}
 
 		this._dom_copy = document.createElement('p');
@@ -564,8 +564,8 @@ export class Input extends PIXI.Container {
 
 		let state = 'VALID';
 
-		for (let i = 0, li = this._rules.length; i < li; i++) {
-			const rule = this._rules[i];
+		for (let i = 0, li = this.rules.length; i < li; i++) {
+			const rule = this.rules[i];
 
 			if (!rule.type) {
 				if (!rule.validator) {
@@ -669,7 +669,7 @@ export class Input extends PIXI.Container {
 	_updateDOMCopy() {
 		const text = this.text.split('');
 		const domText = text.map((letter) => {
-			if (this._type !== 'password') {
+			if (this.type !== 'password') {
 				if (letter === ' ') {
 					letter = '&nbsp;';
 				}
@@ -1006,7 +1006,7 @@ export class Input extends PIXI.Container {
 		}
 
 		if (this._dom_input.value.length === 0) {
-			style.fill = this._placeholderColor;
+			style.fill = this.placeholderColor;
 		}
 
 		return style;
@@ -1042,7 +1042,7 @@ export class Input extends PIXI.Container {
 
 	_derivePIXIFieldText() {
 		if (this._dom_input.value.length === 0) {
-			return this._placeholder;
+			return this.placeholder;
 		}
 
 		if (this._dom_input.type === 'password') {
