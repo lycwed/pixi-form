@@ -1,5 +1,4 @@
 /// <reference types="pixi.js" />
-/// <reference types="gsap" />
 
 declare namespace PIXI {
   namespace form {
@@ -16,7 +15,6 @@ declare namespace PIXI {
       placeholder: string;
       rules?: InputRule[];
       styles?: InputStyles;
-      gsap?: typeof gsap;
     };
 
     export type FormOptions = {
@@ -54,12 +52,12 @@ declare namespace PIXI {
 			border?: {
 				width?: number;
 				radius?: number;
-				color?: numbe;
+				color?: number;
 			};
     };
 
     class Button extends PIXI.Graphics {
-	    constructor(text: string, options: ButtonOptions, gsap?: typeof gsap);
+	    constructor(text: string, options: ButtonOptions);
     }
 
     export class Form extends PIXI.Container {
