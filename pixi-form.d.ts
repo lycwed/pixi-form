@@ -67,7 +67,7 @@ declare namespace PIXI {
     }
 
     export class Form extends PIXI.Container {
-      id?: string;
+      id: string;
       width: number;
       height: number;
       _padding?: number;
