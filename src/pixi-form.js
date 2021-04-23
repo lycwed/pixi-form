@@ -65,11 +65,11 @@ export class Form extends PIXI.Container {
 		this.addChild(input);
 	}
 
-	setButton(type, button, onClick) {
-		this._buttons[type] = button;
-		this._events[type] = onClick;
+	setButton(button) {
+		this._buttons[button.type] = button;
+		this._events[button.type] = button.onTap;
 
-		if (type === 'submit') {
+		if (button.type === 'submit') {
 			button.on('pointerdown', () => {
 				if (this._events.submit) {
 					this._events.submit(this.data);
@@ -130,10 +130,13 @@ export class Form extends PIXI.Container {
 }
 
 export class Button extends PIXI.Graphics {
-	constructor(text, options) {
+	constructor(options) {
 		super();
 
 		this.isButton = true;
+		this.type = options.type;
+		this.label = options.label;
+		this.onTap = options.onTap;
 		const styles = Object.assign({
 			color: 0x333333,
 			fontFamily: 'Arial',
@@ -145,9 +148,9 @@ export class Button extends PIXI.Graphics {
 				radius: 4,
 				color: 0xffffff
 			},
-		}, options || {});
+		}, options.styles || {});
 
-		const width = options.width + (styles.padding * 2);
+		const width = options.styles.width + (styles.padding * 2);
 		const height = styles.fontSize + 8 + (styles.padding * 2);
 
 		this.lineStyle(styles.border.width, styles.border.color, 1, 0);
@@ -167,7 +170,7 @@ export class Button extends PIXI.Graphics {
 			// dropShadowDistance: 0,
 		});
 
-		this.text = new PIXI.Text(text, textStyles);
+		this.text = new PIXI.Text(this.label, textStyles);
 		this.text.x = this.width / 2;
 		this.text.y = this.height / 2;
 		this.text.pivot.x = this.text.width / 2;

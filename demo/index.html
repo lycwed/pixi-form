@@ -283,18 +283,26 @@ function init() {
 		]
 	});
 
-	submitButton = new PIXI.form.Button('SUBMIT RIGHT NOW!', {
-		fontFamily: 'Impact',
-		fontSize: 36,
-		width: 500,
-		padding: 12,
-		color: 0xffffff,
-		backgroundColor: 0x00CC00,
-		border: {
-			radius: 12,
-			width: 1,
-			color: 0x00FF00,
+	submitButton = new PIXI.form.Button({
+		label: 'SUBMIT RIGHT NOW!',
+		type: 'submit',
+		onTap: (data) => {
+			console.log('submit data', data);
+			alert(`Wow! ${data.email} ${data.password}`)
 		},
+		styles: {
+			fontFamily: 'Impact',
+			fontSize: 36,
+			width: 500,
+			padding: 12,
+			color: 0xffffff,
+			backgroundColor: 0x00CC00,
+			border: {
+				radius: 12,
+				width: 1,
+				color: 0x00FF00,
+			},
+		}
 	});
 
 	// All here is optional, you can use
@@ -309,10 +317,7 @@ function init() {
 	form.y = 100;
 	form.addInput(email);
 	form.addInput(password);
-	form.setButton('submit', submitButton, (data) => {
-		console.log('submit data', data);
-		alert(`Wow! ${data.email} ${data.password}`)
-	});
+	form.setButton(submitButton);
 
 	app.stage.addChild(form);
 

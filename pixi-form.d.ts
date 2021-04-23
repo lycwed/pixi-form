@@ -42,9 +42,8 @@ declare namespace PIXI {
       };
     };
 
-    export type ButtonOptions = {
+    export type ButtonStylesOptions = {
       width: number;
-      height: number;
       color?: number;
 			fontFamily?: string;
 			fontSize?: number;
@@ -56,21 +55,28 @@ declare namespace PIXI {
 			};
     };
 
+    export type ButtonOptions = {
+      label: string;
+      type: string;
+      onTap: () => void;
+      styles?: ButtonStylesOptions;
+    };
+
     class Button extends PIXI.Graphics {
-	    constructor(text: string, options: ButtonOptions);
+	    constructor(options: ButtonOptions);
     }
 
     export class Form extends PIXI.Container {
-      id: string;
+      id?: string;
       width: number;
       height: number;
-      _padding: number;
-      _alignItems: string;
-      _spaceBetween: number;
-      _inputs: Input[];
-      _backdrop: PIXI.Graphics;
-      _submitButton: PIXI.Graphics;
-      _events: {
+      _padding?: number;
+      _alignItems?: string;
+      _spaceBetween:? number;
+      _inputs?: Input[];
+      _backdrop?: PIXI.Graphics;
+      _submitButton?: PIXI.Graphics;
+      _events?: {
         [name: string]: () => void;
       };
 
