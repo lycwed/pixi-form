@@ -2,7 +2,8 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title></title>
+	<title>PIXI Form</title>
+	<meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="assets/styles.css"></link>
   <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.9/pixi.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
@@ -194,9 +195,7 @@ window.WebFontConfig = {
 	const s = document.getElementsByTagName('script')[0];
 	s.parentNode.insertBefore(wf, s);
 }());
-</script>
 
-<script type="text/javascript">
 gsap.registerPlugin(PixiPlugin);
 
 var app;
@@ -239,7 +238,6 @@ function init() {
     name: 'email',
     placeholder: 'Enter your email...',
 		styles: styles,
-		gsap: gsap,
 		rules: [
 			{
 				type: 'required',
@@ -261,7 +259,6 @@ function init() {
     name: 'password',
     placeholder: 'Enter your password...',
 		styles: styles,
-		gsap: gsap,
 		rules: [
 			{
 				type: 'required',
@@ -298,7 +295,7 @@ function init() {
 			width: 1,
 			color: 0x00FF00,
 		},
-	}, gsap);
+	});
 
 	// All here is optional, you can use
 	// You can use form to wrap inputs with all logic to submit form 

@@ -2,6 +2,7 @@ export class Form extends PIXI.Container {
 	constructor(options) {
 		super();
 
+		this.isForm = true;
 		this.width = options.width;
 		this.height = options.height;
 		this._padding = options.padding || 10;
@@ -128,9 +129,10 @@ export class Form extends PIXI.Container {
 }
 
 export class Button extends PIXI.Graphics {
-	constructor(text, options, gsap) {
+	constructor(text, options) {
 		super();
 
+		this.isButton = true;
 		const styles = Object.assign({
 			color: 0x333333,
 			fontFamily: 'Arial',
@@ -213,6 +215,8 @@ export class InputStyles {
 export class Input extends PIXI.Container {
 	constructor(options) {
 		super();
+
+		this.isInput = true;
 		this.name = options.name;
 		this.value = options.value || '';
 		this._type = options.type || 'text';
@@ -229,7 +233,6 @@ export class Input extends PIXI.Container {
 			},
 			options.styles || new InputStyles({})
 		);
-		this._gsap = options.gsap;
 
 		this._input_box = new InputBox({
 			default: { color: this._styles.backgroundColor, border: this._styles.border },
@@ -469,13 +472,34 @@ export class Input extends PIXI.Container {
 		this._dom_input.addEventListener('blur', this._onBlurred.bind(this));
 	}
 
-	_onInputKeyDown(e) {
+	_onInputKeyDown(event) {
 		this._selection = [
 			this._dom_input.selectionStart,
 			this._dom_input.selectionEnd,
 		];
-		this._updateCaret();
-		this.emit('keydown', e.keyCode);
+
+		if (event.keyCode !== 9) {
+			this._updateCaret();
+			this.emit('keydown', event.keyCode);
+		} else {
+			event.stopPropagation();
+			event.preventDefault();
+			const inputsLength = this.parent.children.length;
+			let index = this.parent.children.findIndex((child) => child === this);
+			let input = null;
+
+			while (!input) {
+				const element = this.parent.children[index + 1];
+
+				console.log(element);
+				if (element && element.isInput) {
+					input = element;
+					element.focus();
+				} else {
+					index = index < inputsLength - 1 ? index + 1 : 0;
+				}
+			}
+		}
 	}
 
 	_onInputInput(e) {
@@ -722,7 +746,6 @@ export class Input extends PIXI.Container {
 			fill: 0x333333,
 			width: 2,
 			height: this._font_metrics.fontSize + 4,
-			gsap: this._gsap,
 		});
 
 		this._caret.visible = false;
@@ -1169,8 +1192,8 @@ class Caret extends PIXI.Graphics {
 		this.endFill();
 		this.closePath();
 
-		if (options.gsap) {
-			options.gsap.to(this, { alpha: 0, duration: 0.4, ease: "power1.inOut", repeat: -1, yoyo: true });
+		if (gsap) {
+			gsap.to(this, { alpha: 0, duration: 0.4, ease: "power1.inOut", repeat: -1, yoyo: true });
 		} else {
 			this._animateCaret();
 		}
