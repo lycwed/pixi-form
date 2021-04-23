@@ -37,6 +37,7 @@ declare namespace PIXI {
       backgroundColor?: number;
       position?: string;
       border?: {
+        position?: string;
         color?: number;
         width?: number;
         radius?: number;
@@ -69,7 +70,7 @@ declare namespace PIXI {
       _spaceBetween: number;
       _inputs: Input[];
       _backdrop: PIXI.Graphics;
-      _submitButton: PIXI.DisplayObject;
+      _submitButton: PIXI.Graphics;
       _events: {
         [name: string]: () => void;
       };
@@ -77,7 +78,7 @@ declare namespace PIXI {
       constructor(options: FormOptions);
 
       addInput(input: PIXI.form.Input): void;
-      setButton(type: string, button: PIXI.DisplayObject, onClick: () => void): void;
+      setButton(type: string, button: PIXI.Graphics, onClick: () => void): void;
 
       _disableSubmit(): void;
       _enableSubmit(): void;
@@ -96,6 +97,7 @@ declare namespace PIXI {
       backgroundColor: number;
       position: string;
       border: {
+        position: string;
         color: number;
         width: number;
         radius: number;

@@ -79,7 +79,7 @@ export class Form extends PIXI.Container {
 		this.addChild(button);
 		this._updateButtons();
 
-		console.log('this._buttons', type, this._buttons[type]);
+		// console.log('this._buttons', type, this._buttons[type]);
 	}
 
 	get data() {
@@ -231,7 +231,7 @@ export class Input extends PIXI.Container {
 		);
 		this._gsap = options.gsap;
 
-		this._box_generator = new BoxGenerator({
+		this._input_box = new InputBox({
 			default: { color: this._styles.backgroundColor, border: this._styles.border },
 			focused: { color: this._styles.backgroundColor, border: this._styles.border },
 			disabled: { color: this._styles.backgroundColor, border: this._styles.border },
@@ -732,7 +732,7 @@ export class Input extends PIXI.Container {
 	}
 
 	_updateBox() {
-		if (!this._box_generator) {
+		if (!this._input_box) {
 			return;
 		}
 
@@ -760,7 +760,10 @@ export class Input extends PIXI.Container {
 
 		[this._box, this._boxShadow] = this._box_cache[this.state];
 
-		this.addChildAt(this._boxShadow, 0);
+		if (this._boxShadow) {
+			this.addChildAt(this._boxShadow, 0);
+		}
+
 		this.addChildAt(this._box, 1);
 		this._previous.state = this.state;
 	}
@@ -888,7 +891,7 @@ export class Input extends PIXI.Container {
 			if (this._caret && (this._scrollDiff + this._dom_copy.offsetWidth) < this._spanDiff) {
 				diff += this._spanDiff - (this._scrollDiff + this._dom_copy.offsetWidth);
 			}
-			console.log('_scrollDiff', this._scrollDiff, this._spanDiff, diff);
+			// console.log('_scrollDiff', this._scrollDiff, this._spanDiff, diff);
 			this._pixi_field.x = fieldX + diff;
 		} else {
 			this._pixi_field.x = fieldX;
@@ -929,7 +932,7 @@ export class Input extends PIXI.Container {
 	}
 
 	_onPIXIFieldFocus(event) {
-		console.log('event', event);
+		// console.log('event', event);
 		this._callEventOn('pointerdown');
 		this._setDOMInputVisible(true);
 		//sometimes the input is not being focused by the mouseclick
@@ -1039,7 +1042,7 @@ export class Input extends PIXI.Container {
 		let input_bounds = this._getDOMInputBounds();
 
 		for (let i in states) {
-			const [box, boxShadow] = this._box_generator(
+			const [box, boxShadow] = this._input_box.generate(
 				input_bounds.width,
 				input_bounds.height,
 				states[i]
@@ -1184,18 +1187,22 @@ class Caret extends PIXI.Graphics {
 	}
 }
 
-function BoxGenerator(options) {
-	if (options.default) {
-		options.focused = options.focused || options.default;
-		options.disabled = options.disabled || options.default;
-	} else {
-		let temp_styles = options;
-		options = {};
-		options.default = options.focused = options.disabled = temp_styles;
+class InputBox {
+	constructor(options) {
+		if (options.default) {
+			options.focused = options.focused || options.default;
+			options.disabled = options.disabled || options.default;
+		} else {
+			let temp_styles = options;
+			options = {};
+			options.default = options.focused = options.disabled = temp_styles;
+		}
+
+		this.options = options;
 	}
 
-	return function (w, h, state) {
-		let style = options[state.toLowerCase()];
+	generate(w, h, state) {
+		let style = this.options[state.toLowerCase()];
 		if (style) {
 			let box = new PIXI.Graphics();
 			if (style.color) {
