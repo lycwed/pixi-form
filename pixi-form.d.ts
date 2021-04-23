@@ -11,6 +11,7 @@ declare namespace PIXI {
     };
 
     export type InputOptions = {
+      name: string;
       type: string;
       placeholder: string;
       rules?: InputRule[];
