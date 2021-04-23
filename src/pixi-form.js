@@ -9,10 +9,11 @@ export class Form extends PIXI.Container {
 		this._spaceBetween = options.spaceBetween || 4;
 
 		this._inputs = [];
+		this._buttons = {};
 		this._events = {};
 
-		const submitButton = new Button('submit', { width: 150, height: 40 });
-		this.setButton('submit', submitButton);
+		// const submitButton = new Button('submit', { width: 150, height: 40 });
+		// this.setButton('submit', submitButton);
 
 		this._backdrop = new PIXI.Graphics();
 		this._backdrop.beginFill(0xFFFFFF);
@@ -26,14 +27,6 @@ export class Form extends PIXI.Container {
 		});
 
 		this.addChild(this._backdrop);
-	}
-
-	onSubmit(callback) {
-		this._events.submit = callback;
-	}
-
-	onCancel(callback) {
-		this._events.cancel = callback;
 	}
 
 	addInput(input) {
@@ -53,9 +46,7 @@ export class Form extends PIXI.Container {
 		}
 
 		this._inputs.push(input);
-		this.addChild(input);
-
-		this._updateButton();
+		// this._updateButtons();
 
 		input.addEventOn("pointerdown", () => {
 			this._backdrop.interactive = true;
@@ -68,19 +59,48 @@ export class Form extends PIXI.Container {
 		input.addEventOn("statechange", () => {
 			this._updateSubmit();
 		});
+
+		this.addChild(input);
+	}
+
+	setButton(type, button, onClick) {
+		this._buttons[type] = button;
+		this._events[type] = onClick;
+
+		if (type === 'submit') {
+			button.on('pointerdown', () => {
+				if (this._events.submit) {
+					this._events.submit(this.data);
+				}
+			});
+			this._disableSubmit();
+		}
+
+		this.addChild(button);
+		this._updateButtons();
+
+		console.log('this._buttons', type, this._buttons[type]);
+	}
+
+	get data() {
+		const data = {};
+		this._inputs.forEach((input) => {
+			data[input.name] = input.value;
+		});
+		return data;
 	}
 
 	_disableSubmit() {
-		if (this._submitButton) {
-			this._submitButton.alpha = 0.6;
-			this._submitButton.interactive = false;
+		if (this._buttons.submit) {
+			this._buttons.submit.alpha = 0.6;
+			this._buttons.submit.interactive = false;
 		}
 	}
 
 	_enableSubmit() {
-		if (this._submitButton) {
-			this._submitButton.alpha = 1;
-			this._submitButton.interactive = true;
+		if (this._buttons.submit) {
+			this._buttons.submit.alpha = 1;
+			this._buttons.submit.interactive = true;
 		}
 	}
 
@@ -98,49 +118,12 @@ export class Form extends PIXI.Container {
 		}
 	}
 
-	_updateButton() {
+	_updateButtons() {
 		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
-		this._submitButton.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
-		this._submitButton.x = this.width / 2;
-		this._submitButton.pivot.x = this._submitButton.width / 2;
-		this._submitButton.pivot.y = 0;
-	}
-
-	setButton(type, button) {
-		this._submitButton = button;
-		this._submitButton.on('pointerdown', () => {
-			if (type === 'submit' && this._events.submit) {
-				this._events.submit(this.data);
-			}
-		});
-		this.addChild(this._submitButton);
-		this._disableSubmit();
-		this._updateButton();
-
-		console.log('this._submitButton', this._submitButton);
-	}
-
-	get data() {
-		const data = {};
-		this._inputs.forEach((input) => {
-			data[input.name] = input.value;
-		});
-		return data;
-	}
-}
-
-export class InputStyles {
-	constructor(styles) {
-		this.width = styles.width || 200;
-		this.color = styles.color || 0x333333;
-		this.padding = styles.padding || 4;
-		this.fontSize = styles.fontSize || 13;
-		this.fontFamily = styles.fontFamily || 'Arial';
-		this.selectionColor = styles.selectionColor || 0x00AAFF;
-		this.backgroundColor = styles.backgroundColor || 0xEFEFEF;
-		this.border = {
-			...{ color: 0xFFFFFF, width: 0, radius: 0 }, ...styles.border
-		};
+		this._buttons.submit.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+		this._buttons.submit.x = this.width / 2;
+		this._buttons.submit.pivot.x = this._buttons.submit.width / 2;
+		this._buttons.submit.pivot.y = 0;
 	}
 }
 
@@ -181,29 +164,49 @@ export class Button extends PIXI.Graphics {
 			// dropShadowDistance: 0,
 		});
 
-		const styledText = new PIXI.Text(text, textStyles);
-		styledText.x = this.width / 2;
-		styledText.y = this.height / 2;
-		styledText.pivot.x = styledText.width / 2;
-		styledText.pivot.y = styledText.height / 2;
+		this.text = new PIXI.Text(text, textStyles);
+		this.text.x = this.width / 2;
+		this.text.y = this.height / 2;
+		this.text.pivot.x = this.text.width / 2;
+		this.text.pivot.y = this.text.height / 2;
+		this.text.alpha = 0.8;
 
 		this.on('pointerover', () => {
 			if (gsap) {
 				gsap.to(this.scale, { x: 0.99, y: 0.99, duration: 0.3, ease: 'power.2' });
+				gsap.to(this.text, { alpha: 1, duration: 0.3, ease: 'power.2' });
 			} else {
 				this.scale.set(0.99);
+				this.text.alpha = 1;
 			}
 		});
 
 		this.on('pointerout', () => {
 			if (gsap) {
 				gsap.to(this.scale, { x: 1, y: 1, duration: 0.3, ease: 'power.2' });
+				gsap.to(this.text, { alpha: 0.8, duration: 0.3, ease: 'power.2' });
 			} else {
 				this.scale.set(1);
+				this.text.alpha = 0.8;
 			}
 		});
 
-		this.addChild(styledText);
+		this.addChild(this.text);
+	}
+}
+
+export class InputStyles {
+	constructor(styles) {
+		this.width = styles.width || 200;
+		this.color = styles.color || 0x333333;
+		this.padding = styles.padding || 4;
+		this.fontSize = styles.fontSize || 13;
+		this.fontFamily = styles.fontFamily || 'Arial';
+		this.selectionColor = styles.selectionColor || 0x00AAFF;
+		this.backgroundColor = styles.backgroundColor || 0xEFEFEF;
+		this.border = {
+			...{ color: 0xFFFFFF, width: 0, radius: 0 }, ...styles.border
+		};
 	}
 }
 

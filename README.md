@@ -13,14 +13,16 @@ Created with PIXI v5.3.9.
 
 Includes now :
 
-- `PIXI.form.TextInput` to generate input
-- `PIXI.form.TextInputStyles` to generate input styles
+- `PIXI.form.Input` to generate input
+- `PIXI.form.InputStyles` to generate input styles
+- `PIXI.form.Button` to generate a button with styles
 - `PIXI.form.Form` to generate form to wrap inputs
 
 I introduce:
 
 - the input type password
 - the notion of rules to validate an input and the box colorization on blur.
+- the button generator
 - the formulary allows you to validate submit according to the input validation.
 - d.ts file.
 
@@ -57,15 +59,14 @@ const app = new PIXI.Application(
     }
 );
 
-document.querySelector('#canvas-wrapper').appendChild(app.view);
+document.getElementById('canvas-wrapper').appendChild(app.view);
 
-const styles = new PIXI.form.TextInputStyles({
-    fontFamily: 'impact',
+const styles = new PIXI.form.InputStyles({
+    fontFamily: 'Impact',
     fontSize: 36,
     padding: 12,
     width: 500,
     color: 0x333333,
-    selectionColor: 0x00AAFF,
     backgroundColor: 0xEFEFEF,
     border: {
         position: 'bottom',
@@ -75,10 +76,10 @@ const styles = new PIXI.form.TextInputStyles({
     },
 });
 
-const email = new PIXI.form.TextInput({
-type: 'text',
-name: 'email',
-placeholder: 'Enter your email...',
+const email = new PIXI.form.Input({
+    type: 'text',
+    name: 'email',
+    placeholder: 'Enter your email...',
     styles: styles,
     gsap: gsap,
     rules: [
@@ -97,10 +98,10 @@ placeholder: 'Enter your email...',
     ]
 });
 
-const password = new PIXI.form.TextInput({
-type: 'password',
-name: 'password',
-placeholder: 'Enter your password...',
+const password = new PIXI.form.Input({
+    type: 'password',
+    name: 'password',
+    placeholder: 'Enter your password...',
     styles: styles,
     gsap: gsap,
     rules: [
@@ -127,37 +128,20 @@ placeholder: 'Enter your password...',
     ]
 });
 
-// All here is optional, you can use
-const button = new PIXI.Graphics();
-button.lineStyle(1, 0x75F94C, 1, 0);
-button.beginFill(0x6FD254);
-button.drawRoundedRect(0, 0, 530, 70, 12);
-button.endFill();
-button.on('pointerover', () => {
-    button.scale.set(1.1);
-});
-button.on('pointerout', () => {
-    button.scale.set(1);
-});
-
-const buttonStyles = new PIXI.TextStyle({
-    fontFamily: 'impact',
+// Everything from there on is optional
+const submitButton = new PIXI.form.Button('SUBMIT RIGHT NOW!', {
+    fontFamily: 'Impact',
     fontSize: 36,
-    fill: 0xffffff,
-    align: 'center',
-    dropShadow: true,
-    dropShadowColor: 0x75F94C,
-    dropShadowBlur: 20,
-    dropShadowAngle: 0,
-    dropShadowDistance: 0,
-});
-
-const buttonText = new PIXI.Text('SUBMIT RIGHT NOW!', buttonStyles);
-buttonText.x = button.width / 2;
-buttonText.y = button.height / 2;
-buttonText.pivot.x = buttonText.width / 2;
-buttonText.pivot.y = buttonText.height / 2;
-button.addChild(buttonText);
+    width: 500,
+    padding: 12,
+    color: 0xffffff,
+    backgroundColor: 0x00CC00,
+    border: {
+        radius: 12,
+        width: 1,
+        color: 0x00FF00,
+    },
+}, gsap);
 
 // You can use form to wrap inputs with all logic to submit form 
 const form = new PIXI.form.Form({
@@ -170,10 +154,9 @@ const form = new PIXI.form.Form({
 form.y = 100;
 form.addInput(email);
 form.addInput(password);
-form.setSubmitButton(button);
-form.onEvent('submit', (data) => {
-    console.log('submit data', data);
-    alert(`Wow! ${data.email} ${data.password}`)
+form.setButton('submit', submitButton);
+form.onSubmit((data) => {
+    alert(`Wow! ${data.email} ${data.password}`);
 });
 
 app.stage.addChild(form);

@@ -10,13 +10,15 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
 </head>
 
-<body onload="init()">
+<body>
 	<div id="canvas-wrapper"></div>
 	<div class="controls">
 		<div>
 			<label>Font</label>
 			<select id="font">
 				<option value="Impact">Impact</option>
+				<option value="Bangers">Bangers (webfont)</option>
+				<option value="Karantina">Karantina (webfont)</option>
 				<option value="Arial">Arial</option>
 				<option value="Helvetica">Helvetica</option>
 				<option value="Times New Roman">Times New Roman</option>
@@ -137,37 +139,20 @@ var password = new PIXI.form.Input({
 	]
 });
 
-// All here is optional, you can use
-var button = new PIXI.Graphics();
-button.lineStyle(1, 0x00FF00, 1, 0);
-button.beginFill(0x00AA00);
-button.drawRoundedRect(0, 0, 530, 70, 12);
-button.endFill();
-button.on('pointerover', () => {
-	button.scale.set(1.1);
-});
-button.on('pointerout', () => {
-	button.scale.set(1);
-});
-
-var buttonStyles = new PIXI.TextStyle({
-	fontFamily : 'Impact',
+// Everything from there on is optional
+var submitButton = new PIXI.form.Button('SUBMIT RIGHT NOW!', {
+	fontFamily: 'Impact',
 	fontSize: 36,
-	fill : 0xffffff,
-	align : 'center',
-	dropShadow: true,
-	dropShadowColor: 0x75F94C,
-	dropShadowBlur: 20,
-	dropShadowAngle: 0,
-	dropShadowDistance: 0,
-});
-
-var buttonText = new PIXI.Text('SUBMIT RIGHT NOW!', buttonStyles);
-buttonText.x = button.width / 2;
-buttonText.y = button.height / 2;
-buttonText.pivot.x = buttonText.width / 2;
-buttonText.pivot.y = buttonText.height / 2;
-button.addChild(buttonText);
+	width: 500,
+	padding: 12,
+	color: 0xffffff,
+	backgroundColor: 0x00CC00,
+	border: {
+		radius: 12,
+		width: 1,
+		color: 0x00FF00,
+	},
+}, gsap);
 
 // You can use form to wrap inputs with all logic to submit form 
 var form = new PIXI.form.Form({
@@ -180,10 +165,8 @@ var form = new PIXI.form.Form({
 form.y = 100;
 form.addInput(email);
 form.addInput(password);
-form.setSubmitButton(button);
-form.onEvent('submit', (data) => {
-	console.log('submit data', data);
-	alert(`Wow! ${data.email} ${data.password}`)
+form.setButton('submit', submitButton, (data) => {
+	alert(`Wow! ${data.email} ${data.password}`);
 });
 
 app.stage.addChild(form);
@@ -193,7 +176,27 @@ app.stage.addChild(form);
 </body>
 
 <script type="text/javascript">
+window.WebFontConfig = {
+	google: {
+		families: ['Bangers', 'Karantina'],
+	},
+	active() {
+		init();
+	},
+};
+// include the web-font loader script
+(function() {
+	const wf = document.createElement('script');
+	wf.src = `${document.location.protocol === 'https:' ? 'https' : 'http'
+	}://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js`;
+	wf.type = 'text/javascript';
+	wf.async = 'true';
+	const s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(wf, s);
+}());
+</script>
 
+<script type="text/javascript">
 gsap.registerPlugin(PixiPlugin);
 
 var app;
@@ -309,8 +312,7 @@ function init() {
 	form.y = 100;
 	form.addInput(email);
 	form.addInput(password);
-	form.setButton('submit', submitButton); // if you want to create your own button
-	form.onSubmit((data) => {
+	form.setButton('submit', submitButton, (data) => {
 		console.log('submit data', data);
 		alert(`Wow! ${data.email} ${data.password}`)
 	});
