@@ -83,8 +83,8 @@ declare namespace PIXI {
 
       constructor(options: FormOptions);
 
-      addInput(input: PIXI.form.Input): void;
-      setButton(type: string, button: PIXI.Graphics, onClick: () => void): void;
+      addInput(input: Input): void;
+      setButton(button: Button): void;
 
       _disableSubmit(): void;
       _enableSubmit(): void;
