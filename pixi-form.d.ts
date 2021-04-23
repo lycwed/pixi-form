@@ -73,7 +73,7 @@ declare namespace PIXI {
       height: number;
       _padding?: number;
       _alignItems?: string;
-      _spaceBetween:? number;
+      _spaceBetween?: number;
       _inputs?: Input[];
       _backdrop?: PIXI.Graphics;
       _submitButton?: PIXI.Graphics;
