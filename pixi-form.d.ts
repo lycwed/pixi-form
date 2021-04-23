@@ -58,7 +58,7 @@ declare namespace PIXI {
     export type ButtonOptions = {
       label: string;
       type: string;
-      onTap: () => void;
+      onTap: (data: any) => void;
       styles?: ButtonStylesOptions;
     };
 
