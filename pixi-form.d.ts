@@ -5,17 +5,17 @@ declare namespace PIXI {
   namespace form {
     export type STATUS = 'FOCUSED' | 'DISABLED' | 'DEFAULT' | 'VALID' | 'ERROR' | string;
 
-    export type TextInputRule = {
+    export type InputRule = {
       type?: string;
       validate?: (value: any) => boolean;
       onFail: () => void;
     };
 
-    export type TextInputOptions = {
+    export type InputOptions = {
       type: string;
       placeholder: string;
-      rules?: TextInputRule[];
-      styles?: TextInputStyles;
+      rules?: InputRule[];
+      styles?: InputStyles;
       gsap?: typeof gsap;
     };
 
@@ -27,13 +27,13 @@ declare namespace PIXI {
       _spaceBetween?: number;
     };
 
-    export type TextInputStylesOptions = {
+    export type InputStylesOptions = {
       width: number;
       color?: number;
       padding?: number;
       fontSize?: number;
       fontFamily?: string;
-      selectionColor?: string;
+      selectionColor?: number;
       backgroundColor?: number;
       position?: string;
       border?: {
@@ -43,13 +43,31 @@ declare namespace PIXI {
       };
     };
 
+    export type ButtonOptions = {
+      width: number;
+      height: number;
+      color?: number;
+			fontFamily?: string;
+			fontSize?: number;
+			backgroundColor?: number;
+			border?: {
+				width?: number;
+				radius?: number;
+				color?: numbe;
+			};
+    };
+
+    class Button extends PIXI.Graphics {
+	    constructor(text: string, options: ButtonOptions, gsap?: typeof gsap);
+    }
+
     export class Form extends PIXI.Container {
       width: number;
       height: number;
       _padding: number;
       _alignItems: string;
       _spaceBetween: number;
-      _inputs: TextInput[];
+      _inputs: Input[];
       _backdrop: PIXI.Graphics;
       _submitButton: PIXI.DisplayObject;
       _events: {
@@ -58,9 +76,10 @@ declare namespace PIXI {
 
       constructor(options: FormOptions);
 
-      addInput(input: PIXI.form.TextInput): void;
-      onEvent(event: string, callback: () => void): void;
-      setSubmitButton(button: PIXI.DisplayObject): void;
+      addInput(input: PIXI.form.Input): void;
+      setButton(type: string, button: PIXI.DisplayObject): void;
+      onSubmit(callback: () => void): void;
+      onCancel(callback: () => void): void;
 
       _disableSubmit(): void;
       _enableSubmit(): void;
@@ -69,7 +88,7 @@ declare namespace PIXI {
       get data(): any;
     }
 
-    export class TextInputStyles {
+    export class InputStyles {
       width: number;
       color: number;
       padding: number;
@@ -87,14 +106,14 @@ declare namespace PIXI {
       lineHeight: string;
       multiline: boolean;
 
-      constructor(options?: TextInputStylesOptions);
+      constructor(options?: InputStylesOptions);
     }
 
-    export class TextInput extends PIXI.Container {
+    export class Input extends PIXI.Container {
       _type: string;
       _placeholder: string;
-      _rules: TextInputRule[];
-      _styles: TextInputStyles;
+      _rules: InputRule[];
+      _styles: InputStyles;
       _placeholderColor: number;
       _box_generator: any;
       _box_cache: object;
@@ -113,7 +132,7 @@ declare namespace PIXI {
       _max_length: number;
       state: STATUS;
 
-      constructor(options?: TextInputOptions);
+      constructor(options?: InputOptions);
 
       get substituteText(): string;
       set substituteText(substitute: string);

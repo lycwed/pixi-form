@@ -70,7 +70,7 @@ var app = new PIXI.Application(
 
 document.getElementById('canvas-wrapper').appendChild(app.view);
 
-var styles = new PIXI.form.TextInputStyles({
+var styles = new PIXI.form.InputStyles({
 	fontFamily: 'Impact',
 	fontSize: 36,
 	padding: 12,
@@ -85,7 +85,7 @@ var styles = new PIXI.form.TextInputStyles({
 	},
 });
 
-var email = new PIXI.form.TextInput({
+var email = new PIXI.form.Input({
 	type: 'text',
 	name: 'email',
 	placeholder: 'Enter your email...',
@@ -107,7 +107,7 @@ var email = new PIXI.form.TextInput({
 	]
 });
 
-var password = new PIXI.form.TextInput({
+var password = new PIXI.form.Input({
 	type: 'password',
 	name: 'password',
 	placeholder: 'Enter your password...',
@@ -199,6 +199,7 @@ gsap.registerPlugin(PixiPlugin);
 var app;
 var email;
 var password;
+var submitButton;
 
 function init() {
 	var width = 1000;
@@ -215,7 +216,7 @@ function init() {
 
 	document.getElementById('canvas-wrapper').appendChild(app.view);
 
-	var styles = new PIXI.form.TextInputStyles({
+	var styles = new PIXI.form.InputStyles({
 		fontFamily: 'Impact',
 		fontSize: 36,
 		padding: 12,
@@ -230,7 +231,7 @@ function init() {
 		},
 	});
 
-	email = new PIXI.form.TextInput({
+	email = new PIXI.form.Input({
     type: 'text',
     name: 'email',
     placeholder: 'Enter your email...',
@@ -252,7 +253,7 @@ function init() {
 		]
 	});
 
-	password = new PIXI.form.TextInput({
+	password = new PIXI.form.Input({
     type: 'password',
     name: 'password',
     placeholder: 'Enter your password...',
@@ -282,38 +283,21 @@ function init() {
 		]
 	});
 
-	// All here is optional, you can use
-	var button = new PIXI.Graphics();
-	button.lineStyle(4, 0x00FF00, 1, 0);
-	button.beginFill(0x00AA00);
-	button.drawRoundedRect(0, 0, 530, 72, 12);
-	button.endFill();
-	button.on('pointerover', () => {
-		button.scale.set(1.1);
-	});
-	button.on('pointerout', () => {
-		button.scale.set(1);
-	});
-
-	var buttonStyles = new PIXI.TextStyle({
-		fontFamily : 'Impact',
+	submitButton = new PIXI.form.Button('SUBMIT RIGHT NOW!', {
+		fontFamily: 'Impact',
 		fontSize: 36,
-		fill: 0xffffff,
-		align: 'center',
-		dropShadow: true,
-    dropShadowColor: 0x75F94C,
-    dropShadowBlur: 20,
-    dropShadowAngle: 0,
-    dropShadowDistance: 0,
-	});
+		width: 500,
+		padding: 12,
+		color: 0xffffff,
+		backgroundColor: 0x00CC00,
+		border: {
+			radius: 12,
+			width: 1,
+			color: 0x00FF00,
+		},
+	}, gsap);
 
-	var buttonText = new PIXI.Text('SUBMIT RIGHT NOW!', buttonStyles);
-	buttonText.x = button.width / 2;
-	buttonText.y = button.height / 2;
-	buttonText.pivot.x = buttonText.width / 2;
-	buttonText.pivot.y = buttonText.height / 2;
-	button.addChild(buttonText);
-
+	// All here is optional, you can use
 	// You can use form to wrap inputs with all logic to submit form 
 	var form = new PIXI.form.Form({
 		width: width,
@@ -325,8 +309,8 @@ function init() {
 	form.y = 100;
 	form.addInput(email);
 	form.addInput(password);
-	form.setSubmitButton(button);
-	form.onEvent('submit', (data) => {
+	form.setButton('submit', submitButton); // if you want to create your own button
+	form.onSubmit((data) => {
 		console.log('submit data', data);
 		alert(`Wow! ${data.email} ${data.password}`)
 	});

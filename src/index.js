@@ -2,8 +2,9 @@ var PIXIForm = require("./pixi-form");
 var plugin = {
   form: {
     Form: PIXIForm.Form,
-    TextInput: PIXIForm.TextInput,
-    TextInputStyles: PIXIForm.TextInputStyles,
+    Input: PIXIForm.Input,
+    InputStyles: PIXIForm.InputStyles,
+    Button: PIXIForm.Button,
   },
 };
 

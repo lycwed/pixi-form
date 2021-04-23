@@ -8,9 +8,11 @@ export class Form extends PIXI.Container {
 		this._alignItems = options.alignItems || 'left';
 		this._spaceBetween = options.spaceBetween || 4;
 
-		this._submitButton = null;
 		this._inputs = [];
 		this._events = {};
+
+		const submitButton = new Button('submit', { width: 150, height: 40 });
+		this.setButton('submit', submitButton);
 
 		this._backdrop = new PIXI.Graphics();
 		this._backdrop.beginFill(0xFFFFFF);
@@ -26,8 +28,12 @@ export class Form extends PIXI.Container {
 		this.addChild(this._backdrop);
 	}
 
-	onEvent(event, callback) {
-		this._events[event] = callback;
+	onSubmit(callback) {
+		this._events.submit = callback;
+	}
+
+	onCancel(callback) {
+		this._events.cancel = callback;
 	}
 
 	addInput(input) {
@@ -48,6 +54,8 @@ export class Form extends PIXI.Container {
 
 		this._inputs.push(input);
 		this.addChild(input);
+
+		this._updateButton();
 
 		input.addEventOn("pointerdown", () => {
 			this._backdrop.interactive = true;
@@ -90,6 +98,28 @@ export class Form extends PIXI.Container {
 		}
 	}
 
+	_updateButton() {
+		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
+		this._submitButton.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+		this._submitButton.x = this.width / 2;
+		this._submitButton.pivot.x = this._submitButton.width / 2;
+		this._submitButton.pivot.y = 0;
+	}
+
+	setButton(type, button) {
+		this._submitButton = button;
+		this._submitButton.on('pointerdown', () => {
+			if (type === 'submit' && this._events.submit) {
+				this._events.submit(this.data);
+			}
+		});
+		this.addChild(this._submitButton);
+		this._disableSubmit();
+		this._updateButton();
+
+		console.log('this._submitButton', this._submitButton);
+	}
+
 	get data() {
 		const data = {};
 		this._inputs.forEach((input) => {
@@ -97,25 +127,9 @@ export class Form extends PIXI.Container {
 		});
 		return data;
 	}
-
-	setSubmitButton(button) {
-		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
-		button.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
-		button.x = this.width / 2;
-		button.pivot.x = button.width / 2;
-		button.pivot.y = 0;
-		button.on('pointerdown', () => {
-			if (this._events.submit) {
-				this._events.submit(this.data);
-			}
-		})
-		this._submitButton = button;
-		this._disableSubmit();
-		this.addChild(button);
-	}
 }
 
-export class TextInputStyles {
+export class InputStyles {
 	constructor(styles) {
 		this.width = styles.width || 200;
 		this.color = styles.color || 0x333333;
@@ -130,7 +144,70 @@ export class TextInputStyles {
 	}
 }
 
-export class TextInput extends PIXI.Container {
+export class Button extends PIXI.Graphics {
+	constructor(text, options, gsap) {
+		super();
+
+		const styles = Object.assign({
+			color: 0x333333,
+			fontFamily: 'Arial',
+			fontSize: 13,
+			padding: 4,
+			backgroundColor: 0xefefef,
+			border: {
+				width: 1,
+				radius: 4,
+				color: 0xffffff
+			},
+		}, options || {});
+
+		const width = options.width + (styles.padding * 2);
+		const height = styles.fontSize + 8 + (styles.padding * 2);
+
+		this.lineStyle(styles.border.width, styles.border.color, 1, 0);
+		this.beginFill(styles.backgroundColor);
+		this.drawRoundedRect(0, 0, width, height, styles.border.radius);
+		this.endFill();
+
+		const textStyles = new PIXI.TextStyle({
+			fontFamily: styles.fontFamily,
+			fontSize: styles.fontSize,
+			fill: styles.color,
+			align: 'center',
+			// dropShadow: true,
+			// dropShadowColor: 0x75F94C,
+			// dropShadowBlur: 20,
+			// dropShadowAngle: 0,
+			// dropShadowDistance: 0,
+		});
+
+		const styledText = new PIXI.Text(text, textStyles);
+		styledText.x = this.width / 2;
+		styledText.y = this.height / 2;
+		styledText.pivot.x = styledText.width / 2;
+		styledText.pivot.y = styledText.height / 2;
+
+		this.on('pointerover', () => {
+			if (gsap) {
+				gsap.to(this.scale, { x: 0.99, y: 0.99, duration: 0.3, ease: 'power.2' });
+			} else {
+				this.scale.set(0.99);
+			}
+		});
+
+		this.on('pointerout', () => {
+			if (gsap) {
+				gsap.to(this.scale, { x: 1, y: 1, duration: 0.3, ease: 'power.2' });
+			} else {
+				this.scale.set(1);
+			}
+		});
+
+		this.addChild(styledText);
+	}
+}
+
+export class Input extends PIXI.Container {
 	constructor(options) {
 		super();
 		this.name = options.name;
@@ -147,7 +224,7 @@ export class TextInput extends PIXI.Container {
 				border: null,
 				lineHeight: '1',
 			},
-			options.styles || new TextInputStyles({})
+			options.styles || new InputStyles({})
 		);
 		this._gsap = options.gsap;
 
@@ -680,8 +757,8 @@ export class TextInput extends PIXI.Container {
 
 		[this._box, this._boxShadow] = this._box_cache[this.state];
 
-		this.addChildAt(this._boxShadow, 1);
-		this.addChildAt(this._box, 2);
+		this.addChildAt(this._boxShadow, 0);
+		this.addChildAt(this._box, 1);
 		this._previous.state = this.state;
 	}
 
@@ -761,6 +838,7 @@ export class TextInput extends PIXI.Container {
 		this._pixi_field_hitbox.alpha = 0;
 		this._pixi_field_hitbox.interactive = true;
 		this._pixi_field_hitbox.caret = 'text';
+		this._pixi_field_hitbox.buttonMode = true;
 		this._pixi_field_hitbox.on('pointerdown', this._onPIXIFieldFocus.bind(this));
 		this._pixi_field_hitbox.on('pointerupoutside', this.blur.bind(this));
 		this.addChild(this._pixi_field_hitbox);
@@ -847,7 +925,8 @@ export class TextInput extends PIXI.Container {
 		this._pixi_field_hitbox = null;
 	}
 
-	_onPIXIFieldFocus() {
+	_onPIXIFieldFocus(event) {
+		console.log('event', event);
 		this._callEventOn('pointerdown');
 		this._setDOMInputVisible(true);
 		//sometimes the input is not being focused by the mouseclick
