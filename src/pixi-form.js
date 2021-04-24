@@ -493,14 +493,11 @@ export class Input extends PIXI.Container {
 			let input = null;
 
 			while (!input) {
-				const element = this.parent.children[index + 1];
-
-				console.log(element);
+				index = index < inputsLength - 1 ? index + 1 : 0;
+				const element = this.parent.children[index];
 				if (element && element.isInput) {
 					input = element;
 					element.focus();
-				} else {
-					index = index < inputsLength - 1 ? index + 1 : 0;
 				}
 			}
 		}
