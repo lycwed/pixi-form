@@ -1,3 +1,10 @@
+if (typeof gsap === 'object') {
+	if (!gsap.to && gsap.gsap) {
+		gsap = gsap.gsap;
+	}
+	console.log(gsap);
+}
+
 export class Form extends PIXI.Container {
 	constructor(options) {
 		super();
@@ -178,7 +185,7 @@ export class Button extends PIXI.Graphics {
 		this.text.alpha = 0.8;
 
 		this.on('pointerover', () => {
-			if (typeof gsap === 'object') {
+			if (gsap.to) {
 				gsap.to(this.scale, { x: 0.99, y: 0.99, duration: 0.3, ease: 'power.2' });
 				gsap.to(this.text, { alpha: 1, duration: 0.3, ease: 'power.2' });
 			} else {
@@ -188,7 +195,7 @@ export class Button extends PIXI.Graphics {
 		});
 
 		this.on('pointerout', () => {
-			if (typeof gsap === 'object') {
+			if (gsap.to) {
 				gsap.to(this.scale, { x: 1, y: 1, duration: 0.3, ease: 'power.2' });
 				gsap.to(this.text, { alpha: 0.8, duration: 0.3, ease: 'power.2' });
 			} else {
@@ -1193,8 +1200,7 @@ class Caret extends PIXI.Graphics {
 		this.endFill();
 		this.closePath();
 
-		if (typeof gsap === 'object') {
-			console.log('gsap', gsap);
+		if (gsap.to) {
 			gsap.to(this, { alpha: 0, duration: 0.4, ease: "power1.inOut", repeat: -1, yoyo: true });
 		} else {
 			this._animateCaret();
