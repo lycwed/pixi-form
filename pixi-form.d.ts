@@ -13,8 +13,8 @@ declare namespace PIXI {
     export type InputOptions = {
       name: string;
       type: string;
-      placeholder: string;
-      rules?: InputRule[];
+      _placeholder: string;
+      _rules?: InputRule[];
       styles?: InputStyles;
     };
 
@@ -119,8 +119,8 @@ declare namespace PIXI {
       name: string;
       type: string;
       value: string;
-      placeholder: string;
-      rules: InputRule[];
+      _placeholder: string;
+      _rules: InputRule[];
       
       _styles: InputStyles;
       _placeholderColor: number;

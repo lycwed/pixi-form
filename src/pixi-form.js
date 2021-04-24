@@ -224,8 +224,8 @@ export class Input extends PIXI.Container {
 		this.name = options.name;
 		this.value = options.value || '';
 		this.type = options.type || 'text';
-		this.placeholder = options.placeholder;
-		this.rules = options.rules || [];
+		this._placeholder = options.placeholder;
+		this._rules = options.rules || [];
 		this._styles = Object.assign(
 			{
 				position: 'absolute',
@@ -253,13 +253,13 @@ export class Input extends PIXI.Container {
 			this._multiline = false;
 		}
 
-		this.isValid = !this.rules.length;
+		this.isValid = !this._rules.length;
 		this._eventsCallback = {};
 		this._box_cache = {};
 		this._previous = {};
 		this._dom_added = false;
 		this._dom_visible = true;
-		this.placeholderColor = 0xa9a9a9;
+		this._placeholderColor = 0xa9a9a9;
 		this._selection = [0, 0];
 		this._restrict_value = '';
 		this._createDOMInput();
@@ -291,16 +291,16 @@ export class Input extends PIXI.Container {
 			this._dom_visible = true;
 		}
 
-		this.placeholder = this.placeholder;
+		this.placeholder = this._placeholder;
 		this._update();
 	}
 
 	get placeholder() {
-		return this.placeholder;
+		return this._placeholder;
 	}
 
 	set placeholder(text) {
-		this.placeholder = text;
+		this._placeholder = text;
 		if (this._substituted) {
 			this._updatePIXIField();
 			this._dom_input.placeholder = '';
@@ -564,8 +564,8 @@ export class Input extends PIXI.Container {
 
 		let state = 'VALID';
 
-		for (let i = 0, li = this.rules.length; i < li; i++) {
-			const rule = this.rules[i];
+		for (let i = 0, li = this._rules.length; i < li; i++) {
+			const rule = this._rules[i];
 
 			if (!rule.type) {
 				if (!rule.validator) {
@@ -1006,7 +1006,7 @@ export class Input extends PIXI.Container {
 		}
 
 		if (this._dom_input.value.length === 0) {
-			style.fill = this.placeholderColor;
+			style.fill = this._placeholderColor;
 		}
 
 		return style;
@@ -1042,7 +1042,7 @@ export class Input extends PIXI.Container {
 
 	_derivePIXIFieldText() {
 		if (this._dom_input.value.length === 0) {
-			return this.placeholder;
+			return this._placeholder;
 		}
 
 		if (this._dom_input.type === 'password') {
