@@ -1194,6 +1194,7 @@ class Caret extends PIXI.Graphics {
 		this.closePath();
 
 		if (typeof gsap === 'object') {
+			console.log('gsap', gsap);
 			gsap.to(this, { alpha: 0, duration: 0.4, ease: "power1.inOut", repeat: -1, yoyo: true });
 		} else {
 			this._animateCaret();
