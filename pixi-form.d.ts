@@ -49,6 +49,7 @@ declare namespace PIXI {
 			fontFamily?: string;
 			fontSize?: number;
 			backgroundColor?: number;
+			padding?: number;
 			border?: {
 				width?: number;
 				radius?: number;
