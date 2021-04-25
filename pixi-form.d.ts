@@ -7,7 +7,7 @@ declare namespace PIXI {
     export type InputRule = {
       type?: string;
       validate?: (value: any) => boolean;
-      onFail: () => void;
+      onFail?: () => void;
     };
 
     export type InputOptions = {
