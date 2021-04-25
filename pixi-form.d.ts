@@ -21,7 +21,7 @@ declare namespace PIXI {
     export type FormOptions = {
       width: number;
       height: number;
-      _padding?: number;
+      _padding?: number | number[];
       _alignItems?: string;
       _spaceBetween?: number;
     };

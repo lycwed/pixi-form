@@ -2,7 +2,6 @@ if (typeof gsap === 'object') {
 	if (!gsap.to && gsap.gsap) {
 		gsap = gsap.gsap;
 	}
-	console.log(gsap);
 }
 
 export class Form extends PIXI.Container {
@@ -13,9 +12,9 @@ export class Form extends PIXI.Container {
 		this.id = options.id;
 		this.width = options.width;
 		this.height = options.height;
-		this._padding = options.padding || 10;
+		this._padding = typeof options.padding === 'number' ? [options.padding, options.padding, options.padding, options.padding] : options.padding || [0, 0, 0, 0];
 		this._alignItems = options.alignItems || 'left';
-		this._spaceBetween = options.spaceBetween || 4;
+		this._spaceBetween = options.spaceBetween || 1;
 
 		this._inputs = [];
 		this._buttons = {};
@@ -29,10 +28,15 @@ export class Form extends PIXI.Container {
 		this._backdrop.drawRect(0, 0, options.width, options.height);
 		this._backdrop.endFill();
 		this._backdrop.on("pointerdown", () => {
+			const selection = document.getSelection();
+			selection.removeAllRanges();
 			this._inputs.forEach((input) => {
-				input.blur();
-				this._backdrop.interactive = false;
+				if (input.state === 'FOCUSED') {
+					input._updateSelectionBox();
+					input.blur();
+				}
 			});
+			this._backdrop.interactive = false;
 		});
 
 		this.addChild(this._backdrop);
@@ -40,7 +44,7 @@ export class Form extends PIXI.Container {
 
 	addInput(input) {
 		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
-		input.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+		input.y = this._padding[0] + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
 
 		switch (this._alignItems) {
 			case 'center':
@@ -50,7 +54,7 @@ export class Form extends PIXI.Container {
 				break;
 
 			case 'left':
-				input.x = this._padding;
+				input.x = this._padding[3];
 				break;
 		}
 
@@ -129,7 +133,7 @@ export class Form extends PIXI.Container {
 
 	_updateButtons() {
 		const lastInputHeight = this._inputs.length ? this._inputs[this._inputs.length - 1].height : 0;
-		this._buttons.submit.y = this._padding + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
+		this._buttons.submit.y = this._padding[0] + ((lastInputHeight + this._spaceBetween) * this._inputs.length);
 		this._buttons.submit.x = this.width / 2;
 		this._buttons.submit.pivot.x = this._buttons.submit.width / 2;
 		this._buttons.submit.pivot.y = 0;
@@ -177,7 +181,7 @@ export class Button extends PIXI.Graphics {
 			// dropShadowDistance: 0,
 		});
 
-		this.text = new PIXI.Text(this.label, textStyles);
+		this.text = new PIXI.Text(` ${this.label} `, textStyles);
 		this.text.x = this.width / 2;
 		this.text.y = this.height / 2;
 		this.text.pivot.x = this.text.width / 2;
@@ -724,12 +728,12 @@ export class Input extends PIXI.Container {
 			const width = spans.map((span) => span.offsetWidth).reduce((acc, val) => acc + val);
 			this._selectionBox.width = width;
 			this._selectionBox.x = this._caret.x;
-			this._selectionBox.alpha = 0.4;
+			this._selectionBox.visible = true;
 			this._caret.visible = false;
 
 		} else {
 			this._selectionBox.width = 1;
-			this._selectionBox.alpha = 0;
+			this._selectionBox.visible = false;
 
 			if (this.state === 'FOCUSED') {
 				this._caret.visible = true;
@@ -743,7 +747,8 @@ export class Input extends PIXI.Container {
 		this._selectionBox.drawRect(0, 0, 1, height);
 		this._selectionBox.endFill();
 		this._selectionBox.closePath();
-		this._selectionBox.alpha = 0;
+		this._selectionBox.alpha = 0.4;
+		this._selectionBox.visible = false;
 		this._selectionBox.mask = this._pixi_field_mask;
 
 		this.addChild(this._selectionBox);

@@ -18,6 +18,7 @@
 			<label>Font</label>
 			<select id="font">
 				<option value="Impact">Impact</option>
+				<option value="Jolly Lodger">Jolly Lodger (webfont)</option>
 				<option value="Bangers">Bangers (webfont)</option>
 				<option value="Karantina">Karantina (webfont)</option>
 				<option value="Arial">Arial</option>
@@ -179,7 +180,7 @@ app.stage.addChild(form);
 <script type="text/javascript">
 window.WebFontConfig = {
 	google: {
-		families: ['Bangers', 'Karantina'],
+		families: ['Bangers', 'Karantina', 'Jolly Lodger'],
 	},
 	active() {
 		init();
@@ -206,22 +207,27 @@ var submitButton;
 function init() {
 	var width = 1000;
 	var height = 600;
-	app = new PIXI.Application(
-		{ 
-			width: width,
-			height: height,
-			antialias: true,
-			backgroundColor: 0xffffff,
-			resolution: window.devicePixelRatio || 1
-		}
-	);
+	app = new PIXI.Application({ 
+		width: width,
+		height: height,
+		antialias: true,
+		backgroundColor: 0xffffff,
+		resolution: window.devicePixelRatio || 1,
+		preserveDrawingBuffer: true,
+		autoDensity: false,
+		backgroundColor: 0x000000,
+		clearBeforeRender: true,
+		powerPreference: 'high-performance',
+		sharedTicker: false,
+		sharedLoader: false,
+	});
 
 	document.getElementById('canvas-wrapper').appendChild(app.view);
 
 	var styles = new PIXI.form.InputStyles({
-		fontFamily: 'Impact',
-		fontSize: 36,
-		padding: 12,
+		fontFamily: 'Jolly Lodger',
+		fontSize: 42,
+		padding: 10,
 		width: 500,
 		color: 0x333333,
 		backgroundColor: 0xEFEFEF,
@@ -291,8 +297,8 @@ function init() {
 			alert(`Wow! ${data.email} ${data.password}`)
 		},
 		styles: {
-			fontFamily: 'Impact',
-			fontSize: 36,
+			fontFamily: 'Bangers',
+			fontSize: 40,
 			width: 500,
 			padding: 12,
 			color: 0xffffff,
@@ -312,9 +318,9 @@ function init() {
 		height: height,
 		alignItems: 'center',
 		spaceBetween: 10,
+		padding: [100, 10, 10, 10],
 	});
 
-	form.y = 100;
 	form.addInput(email);
 	form.addInput(password);
 	form.setButton(submitButton);
