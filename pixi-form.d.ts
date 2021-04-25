@@ -21,9 +21,9 @@ declare namespace PIXI {
     export type FormOptions = {
       width: number;
       height: number;
-      _padding?: number | number[];
-      _alignItems?: string;
-      _spaceBetween?: number;
+      padding?: number | number[];
+      alignItems?: string;
+      spaceBetween?: number;
     };
 
     export type InputStylesOptions = {
